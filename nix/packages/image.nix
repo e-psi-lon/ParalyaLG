@@ -28,6 +28,7 @@ let
       jlink --module-path ${headlessJdk}/lib/openjdk/jmods \
         --add-modules java.base,java.xml,java.naming \
         --no-header-files --no-man-pages --strip-debug \
+        --compress=2 \
         --output $out
     '';
     inherit (headlessJdk) meta;
@@ -52,43 +53,47 @@ dockerTools.streamLayeredImage {
 
       prettyName = "${nixosVersion} (${nixosCodeNamePretty})";
       versionSuffix = lib.trivial.versionSuffix;
+
+      osRelease = {
+        NAME = "Nix Container";
+        ID = "nix-container";
+        VERSION = prettyName;
+        VERSION_ID = nixosVersion;
+        VERSION_CODENAME = nixosCodeName;
+        PRETTY_NAME = "Nix Container ${prettyName}";
+        BUILD_ID = "${nixosVersion}.${versionSuffix}";
+        CPE_NAME = "";
+        DEFAULT_HOSTNAME = "nixos";
+        LOGO = "nix-snowflake";
+        HOME_URL = "https://nixos.org/manual/nix/stable/";
+        DOCUMENTATION_URL = "https://nix.dev";
+        SUPPORT_URL = "https://nixos.org/community.html";
+        BUG_REPORT_URL = "https://github.com/NixOS/nixpkgs/issues";
+        VENDOR_NAME = "NixOS";
+        VENDOR_URL = "https://nixos.org/";
+        ANSI_COLOR = "0;38;2;126;186;228";
+        ID_LIKE = "nixos";
+        IMAGE_ID = "paralyabot";
+        IMAGE_VERSION = "${paralyabot-jar.version}";
+        VARIANT = "Container";
+        VARIANT_ID = "container";
+      };
+
+      lsbRelease = {
+        DISTRIB_ID = "nixos";
+        DISTRIB_RELEASE = nixosVersion;
+        DISTRIB_CODENAME = nixosCodeName;
+        DISTRIB_DESCRIPTION = "Nix Container ${prettyName}";
+        LSB_VERSION = prettyName;
+      };
+      toEnvFile = attrs: builtins.concatStringsSep "\n" (
+        lib.mapAttrsToList (k: v: "${k}=${toString v}") attrs
+      );
     in
     [
       cacert
-      (writeTextDir "etc/os-release" ''
-      ANSI_COLOR="0;38;2;126;186;228"
-      BUG_REPORT_URL="https://github.com/NixOS/nixpkgs/issues"
-      BUILD_ID="${nixosVersion}.${versionSuffix}"
-      CPE_NAME="cpe:/o:nixos:nixos:${nixosVersion}"
-      DEFAULT_HOSTNAME=nixos
-      DOCUMENTATION_URL="https://nixos.org/learn.html"
-      HOME_URL="https://nixos.org/"
-      ID=nixos
-      ID_LIKE=""
-      IMAGE_ID=""
-      IMAGE_VERSION=""
-      LOGO="nix-snowflake"
-      NAME=NixOS
-      PRETTY_NAME="NixOS ${prettyName}"
-      SUPPORT_URL="https://nixos.org/community.html"
-      VARIANT=""
-      VARIANT_ID=""
-      VENDOR_NAME=NixOS
-      VENDOR_URL="https://nixos.org/"
-      VERSION="${prettyName}"
-      VERSION_CODENAME="${nixosCodeName}"
-      VERSION_ID="${nixosVersion}"
-
-    '')
-
-    # Complete /etc/lsb-release Stub
-    (writeTextDir "etc/lsb-release" ''
-      DISTRIB_CODENAME="${nixosCodeName}"
-      DISTRIB_DESCRIPTION="NixOS ${prettyName}"
-      DISTRIB_ID=nixos
-      DISTRIB_RELEASE="${nixosVersion}"
-      LSB_VERSION="${prettyName}"
-    '')
+      (writeTextDir "etc/os-release" (toEnvFile osRelease))
+      (writeTextDir "etc/lsb-release" (toEnvFile lsbRelease))
     ];
 
   extraCommands = ''
@@ -104,13 +109,13 @@ dockerTools.streamLayeredImage {
       "-XX:+UseContainerSupport"
       "-XX:+UseStringDeduplication"
       "-XX:+PerfDisableSharedMem"
-      "-XX:SoftMaxHeapSize=32m"
+      "-XX:SoftMaxHeapSize=170m"
       "-XX:+DisableExplicitGC"
       "-XX:+ExitOnOutOfMemoryError"
       "-XX:MaxGCPauseMillis=50"
       "-XX:G1HeapRegionSize=1m"
       "-XX:ReservedCodeCacheSize=64m"
-      "-Xms12m"
+      "-Xms128m"
       "-Xmx256m"
       "--enable-native-access=ALL-UNNAMED"
       "-jar"
