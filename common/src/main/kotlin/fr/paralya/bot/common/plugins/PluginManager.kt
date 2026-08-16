@@ -2,30 +2,40 @@ package fr.paralya.bot.common.plugins
 
 import dev.kordex.core.ExtensibleBot
 import dev.kordex.core.koin.KordExKoinComponent
+import dev.kordex.core.utils.loadModule
 import fr.paralya.bot.common.ApiVersion
 import fr.paralya.bot.common.CommonModule
+import fr.paralya.bot.common.runCatchingException
+import fr.paralya.bot.common.runCatchingTypedException
 import dev.kordex.core.plugins.PluginManager as KordExPluginManager
 import kotlinx.coroutines.flow.toSet
 import kotlinx.coroutines.launch
+import org.koin.core.context.unloadKoinModules
+import org.koin.core.module.Module
+import org.koin.dsl.bind
 import org.pf4j.PluginRuntimeException
 import org.pf4j.PluginState
 import org.pf4j.PluginStateEvent
 import org.pf4j.PluginStateListener
 import org.pf4j.PluginWrapper
 import java.nio.file.Path
+import kotlin.reflect.KClass
 
 class PluginManager(roots: List<Path>, enabled: Boolean) : KordExPluginManager(roots, enabled), KordExKoinComponent {
-
     init {
         addPluginStateListener(PluginListener())
     }
+
+    private val koinModules: MutableMap<String, Module> = mutableMapOf()
 
     @Suppress("ThrowsCount")
     internal fun validatePlugin(wrapper: PluginWrapper, pluginPath: Path) {
         val classLoader = wrapper.pluginClassLoader
         val pluginClass = classLoader.loadClass(wrapper.descriptor.pluginClass)
         val pluginId = wrapper.pluginId
-        logger.debug { "Verifying validity of the plugin at path $pluginPath with main class ${wrapper.descriptor.pluginClass}" }
+        logger.debug {
+            "Verifying validity of the plugin at path $pluginPath with main class ${wrapper.descriptor.pluginClass}"
+        }
         if (!Plugin::class.java.isAssignableFrom(pluginClass)) {
             throw PluginValidationException("Plugin $pluginId does not extend Plugin", pluginId)
         }
@@ -52,6 +62,14 @@ class PluginManager(roots: List<Path>, enabled: Boolean) : KordExPluginManager(r
     override fun loadPluginFromPath(pluginPath: Path): PluginWrapper {
         val wrapper = super.loadPluginFromPath(pluginPath)
         validatePlugin(wrapper, pluginPath)
+        val plugin = wrapper.plugin as? Plugin
+            ?: throw PluginLoadingException("The plugin at path $pluginPath is not a Plugin despite " +
+                    "passing validation.", pluginId = wrapper.pluginId)
+        val module = loadModule {
+            @Suppress("UNCHECKED_CAST")
+            single { plugin } bind plugin::class as KClass<Plugin>
+        }
+        koinModules[wrapper.pluginId] = module
         return wrapper
     }
 
@@ -66,10 +84,16 @@ class PluginManager(roots: List<Path>, enabled: Boolean) : KordExPluginManager(r
         val plugin = getPlugin(pluginId) ?: return OldPluginNotFound
         val pluginPath = plugin.pluginPath!! // PluginWrapper requires a path in its constructor
         val fullPath = if (pluginPath.isAbsolute) pluginPath else pluginsRoot.resolve(pluginPath)
-        val reloadStrategy = createReloadStrategy(pluginId, fullPath, newPath ?: fullPath, logger)
+        val reloadStrategy = createReloadStrategy(
+            pluginId,
+            oldPluginPath = fullPath,
+            newPluginZipPath = newPath ?: fullPath,
+            logger
+        )
         return reloadStrategy.reload()
     }
 
+    @Suppress("ForbiddenComment", "UnusedPrivateFunction") // Already tracked
     // TODO: Consolidate handling and expose to public API
     private fun reloadPlugins() {
         unloadPlugins()
@@ -77,24 +101,34 @@ class PluginManager(roots: List<Path>, enabled: Boolean) : KordExPluginManager(r
         startPlugins()
     }
 
-        fun tryStopPlugin(pluginId: String) = try {
-            // Non-nullable enum
-            // And if PF4J changes, we want to get a failure not a success holding null
-            Result.success(stopPlugin(pluginId)!!)
-        } catch (e: PluginRuntimeException) {
-            Result.failure(e)
-        }
+    fun tryStopPlugin(pluginId: String) = runCatchingTypedException<PluginRuntimeException, _> {
+        // Non-nullable enum
+        // And if PF4J changes, we want to get a failure not a success holding null
+        stopPlugin(pluginId)!!
+    }
 
-        fun tryLoadAndStartPlugin(pluginPath: Path) = try {
-            val fullPath = if (pluginPath.isAbsolute) pluginPath else pluginsRoot.resolve(pluginPath)
-            val pluginEntry = plugins.entries.find { it.value.pluginPath == fullPath }
-            val pluginId = if (pluginEntry != null) pluginEntry.key else loadPlugin(fullPath)
-            // Non-nullable enum
-            // And if PF4J changes, we want to get a failure not a success holding null
-            Result.success(startPlugin(pluginId)!!)
-        } catch (e: Exception) { // Untrusted start method
-            Result.failure(e)
+    fun tryLoadAndStartPlugin(pluginPath: Path) = runCatchingException {
+        val fullPath = if (pluginPath.isAbsolute) pluginPath else pluginsRoot.resolve(pluginPath)
+        val pluginId = plugins.entries.firstOrNull { it.value.pluginPath == fullPath }?.key
+            ?: loadPlugin(fullPath)
+        // Non-nullable enum
+        // And if PF4J changes, we want to get a failure not a success holding null
+        startPlugin(pluginId)!!
+    }
+
+    override fun stopPlugin(pluginId: String, stopDependent: Boolean): PluginState? {
+        if (plugins.containsKey(pluginId) && checkPluginState(pluginId, PluginState.STARTED)) {
+            koinModules[pluginId]
+                ?.let { module ->
+                    unloadKoinModules(module)
+                    koinModules.remove(pluginId)
+                }
+                ?: logger.error {
+                    "Plugin $pluginId not found in Koin modules despite the plugin being a started plugin."
+                }
         }
+        return super.stopPlugin(pluginId, stopDependent)
+    }
 
     private inner class PluginListener : PluginStateListener, KordExKoinComponent {
         override fun pluginStateChanged(event: PluginStateEvent?) {

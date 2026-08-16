@@ -11,7 +11,8 @@ val libs: VersionCatalog = extensions.getByType<VersionCatalogsExtension>().name
 kotlin {
 	jvmToolchain(libs.findVersion("jvm").get().toString().toInt())
 	compilerOptions {
-		freeCompilerArgs.add("-Xcontext-parameters")
+		// Kotlin 2.4 will allow to remove these two compiler flags
+		freeCompilerArgs.addAll("-Xcontext-parameters", "-Xallow-reified-type-in-catch")
 	}
 }
 dependencies {

@@ -1,3 +1,4 @@
+@file:Suppress("TooManyFunctions")
 package fr.paralya.bot.lg.data
 
 import dev.kord.cache.api.DataCache
@@ -11,13 +12,14 @@ import fr.paralya.bot.common.cache.removeSerialized
 import fr.paralya.bot.common.plugins.getPluginInstance
 import fr.paralya.bot.lg.LgPlugin
 import kotlinx.serialization.Serializable
+import kotlin.collections.plus
 
 /**
  * Represents the game data for the Werewolf game.
  *
  * @property phase The current phase of the game (day or night).
  * @property lastWerewolfMessageSender ID of the last player who sent a message in the werewolf channel.
- * @property currentProfilePicture Used to select which variant of the profile picture to use.
+ * @property isProfilePictureFlipped Used to select which variant of the profile picture to use.
  * @property channels Map of channel types/name to their respective [Snowflake] IDs.
  * @property interviews List of interview channel IDs.
  */
@@ -25,42 +27,38 @@ import kotlinx.serialization.Serializable
 data class GameData(
 	val phase: GamePhase = GamePhase.Night(0),
 	val lastWerewolfMessageSender: Snowflake? = null,
-	val currentProfilePicture: Boolean = false,
+	val isProfilePictureFlipped: Boolean = false,
 	val channels: Map<String, Snowflake> = mapOf(),
 	val interviews: List<Snowflake> = listOf()
-) {
+)
 
-	/**
-	 * Creates a copy of the current game data, advancing to the next day.
-	 * @return A new [GameData] instance with a phase set to DAY and dayCount incremented.
-	 */
-	fun nextPhase() = copy(phase = phase.next())
+/**
+ * Creates a copy of the current game data, advancing to the next day.
+ * @return A new [GameData] instance with a phase set to DAY and dayCount incremented.
+ */
+fun GameData.nextPhase() = copy(phase = phase.next())
 
-	/**
-	 * Registers a channel in the game.
-	 * @param type The type of channel to register.
-	 * @param channelId The [Snowflake] ID of the channel.
-	 * @return A new [GameData] instance with the channel added to the channels map.
-	 */
-	fun registerChannel(type: String, channelId: Snowflake) =
-		copy(channels = channels + (type to channelId))
+/**
+ * Registers a channel in the game.
+ * @param type The type of channel to register.
+ * @param channelId The [Snowflake] ID of the channel.
+ * @return A new [GameData] instance with the channel added to the channels map.
+ */
+fun GameData.registerChannel(type: String, channelId: Snowflake) = copy(channels = channels + (type to channelId))
 
-	/**
-	 * Adds an interview channel to the game.
-	 * @param interviewId The [Snowflake] ID of the interview channel.
-	 * @return A new [GameData] instance with the interview added to the interview list.
-	 */
-	fun addInterview(interviewId: Snowflake) =
-		copy(interviews = interviews + interviewId)
+/**
+ * Adds an interview channel to the game.
+ * @param interviewId The [Snowflake] ID of the interview channel.
+ * @return A new [GameData] instance with the interview added to the interview list.
+ */
+fun GameData.addInterview(interviewId: Snowflake) = copy(interviews = interviews + interviewId)
 
-	/**
-	 * Removes an interview channel from the game.
-	 * @param interviewId The [Snowflake] ID of the interview channel to remove.
-	 * @return A new [GameData] instance with the specified interview removed from the interview list.
-	 */
-	fun removeInterview(interviewId: Snowflake) =
-		copy(interviews = interviews.filter { it != interviewId })
-}
+/**
+ * Removes an interview channel from the game.
+ * @param interviewId The [Snowflake] ID of the interview channel to remove.
+ * @return A new [GameData] instance with the specified interview removed from the interview list.
+ */
+fun GameData.removeInterview(interviewId: Snowflake) = copy(interviews = interviews.filter { it != interviewId })
 
 // Cache extension functions
 
@@ -92,7 +90,7 @@ suspend fun DataCache.resetGameData() = atomic {
  * Automatically creates new GameData if none exists, or updates existing data.
  * @param modifier A function that transforms the current [GameData] to a new [GameData].
  */
-suspend fun DataCache.updateGameData(modifier: suspend (GameData) -> GameData) = atomic {
+internal suspend inline fun DataCache.updateGameData(modifier: (GameData) -> GameData) = atomic {
 	putSerialized(
 		pluginNamespace,
 		modifier(querySerialized<GameData>(pluginNamespace).singleOrNull() ?: GameData())
@@ -122,6 +120,7 @@ suspend fun DataCache.getChannelId(type: String) = getGameData().channels[type]
  * Gets the [TextChannel] for a specific channel [type] within an application command context
  * allowing to access to the channel itself.
  */
+@Suppress("UnsafeCallOnNullableType") // Is called from guild-command-only context
 context(ctx: ApplicationCommandContext)
 suspend fun DataCache.getChannel(type: LgChannelType) =
 	getChannelId(type)?.let { ctx.guild!!.getChannel(it) as TextChannel }
@@ -164,11 +163,11 @@ suspend fun DataCache.setLastWerewolfMessageSender(senderId: Snowflake) =
  * Toggles the profile picture state in the game data.
  */
 suspend fun DataCache.toggleProfilePicture() =
-	updateGameData { it.copy(currentProfilePicture = !it.currentProfilePicture) }
+	updateGameData { it.copy(isProfilePictureFlipped = !it.isProfilePictureFlipped) }
 
 /**
  * Gets the current profile picture state.
  * @return Current profile picture boolean state.
  */
 suspend fun DataCache.getProfilePictureState() =
-	getGameData().currentProfilePicture
+	getGameData().isProfilePictureFlipped

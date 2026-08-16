@@ -22,6 +22,7 @@ import dev.kordex.core.extensions.Extension
 import dev.kordex.core.extensions.ephemeralSlashCommand
 import dev.kordex.core.extensions.event
 import dev.kordex.core.utils.suggestStringMap
+import dev.kordex.i18n.Key
 import dev.kordex.i18n.I18n as KI18n
 import fr.paralya.bot.common.config.ConfigManager
 import fr.paralya.bot.I18n
@@ -41,6 +42,8 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.takeWhile
 import org.koin.core.component.inject
+
+private const val MAX_EXPORTABLE_MESSAGE = 1000
 
 /**
  * Base extension for the bot.
@@ -81,9 +84,10 @@ class Base : Extension() {
 					"DM"
 				) {
 					content = message.content
-					if (message.referencedMessage != null) embed {
+					val referencedMessage = message.referencedMessage
+					if (referencedMessage != null) embed {
 						title = I18n.Transmission.Reference.title.contextTranslate()
-						description = message.referencedMessage!!.content
+						description = referencedMessage.content
 					}
 				}
 			}
@@ -105,10 +109,10 @@ class Base : Extension() {
 					event.new.author.value.asUser(kord)?.avatar?.cdnUrl?.toUrl(),
 					"DM"
 				) {
-					content = event.new.content.value ?: ""
+					content = event.new.content.value.orEmpty()
 					embed {
 						title = I18n.Transmission.Update.title.contextTranslate()
-						description = event.new.content.value ?: ""
+						description = event.new.content.value.orEmpty()
 					}
 				}
 			}
@@ -127,6 +131,7 @@ class Base : Extension() {
 				if (oldMessage != null) {
 					val webhook = bot.getWebhook(dmChannelId, "DM")
 					// Keep the NPE here, we want a loud error if it's null
+					@Suppress("UnsafeCallOnNullableType")
 					webhook.deleteMessage(webhook.token!!, oldMessage.id)
 				}
 			}
@@ -165,18 +170,22 @@ class Base : Extension() {
 
             adminOnly {
                 val channel = arguments.channel as MessageChannelBehavior? ?: channel
-                val messages = when {
-                arguments.start != null && arguments.end != null -> channel
-					.getMessagesAfter(arguments.start!!)
-					.takeWhile { it.id != arguments.end!! }
-                arguments.start != null && arguments.count != null -> channel
-					.getMessagesAfter(arguments.start!!)
-					.take(arguments.count!!)
-                else -> channel.getMessagesBefore(
-					channel.asChannel().lastMessageId ?: Snowflake.max,
-					arguments.count
-				)
-            }
+				val start = arguments.start
+				val end = arguments.end
+				val count = arguments.count
+
+				val messages = when {
+					start != null && end != null -> channel
+						.getMessagesAfter(start)
+						.takeWhile { message -> message.id != end }
+					start != null && count != null -> channel
+						.getMessagesAfter(start)
+						.take(count)
+					else -> channel.getMessagesBefore(
+						channel.asChannel().lastMessageId ?: Snowflake.max,
+						arguments.count
+					)
+				}
                 respond {
                     content = I18n.ChatExport.Response.Success.txt.contextTranslate()
                     when (arguments.format.parsed) {
@@ -204,7 +213,9 @@ class Base : Extension() {
 			}
 			autoComplete {
 				val effectiveLocale = (locale ?: guildLocale)?.asJavaLocale() ?: KI18n.defaultLocale
-				suggestStringMap(gameRegistry.toChoices().mapKeys { it.key.	translateLocale(effectiveLocale) })
+				suggestStringMap(gameRegistry.toChoices().mapKeys {
+					entry -> entry.key.translateLocale(effectiveLocale)
+				})
 			}
 		}
 	}
@@ -214,7 +225,7 @@ class Base : Extension() {
             name = I18n.ChatExport.Argument.Count.name
             description = I18n.ChatExport.Argument.Count.description
             minValue = 1
-            maxValue = 1000
+            maxValue = MAX_EXPORTABLE_MESSAGE
             validate {
                 if (value != null && end != null) fail(I18n.ChatExport.Argument.Count.Error.mutuallyExclusive)
             }
@@ -228,12 +239,11 @@ class Base : Extension() {
         val end: Snowflake? by optionalSnowflake {
             name = I18n.ChatExport.Argument.End.name
             description = I18n.ChatExport.Argument.End.description
-            validate {
-				if (start == null && value != null)
-                     fail(I18n.ChatExport.Argument.End.Error.startRequired)
-                else if (value != null && value!! < start!!)
-                    fail(I18n.ChatExport.Argument.End.Error.invalidRange)
-            }
+			validate {
+				val value = value ?: return@validate
+				val start = start ?: return@validate fail(I18n.ChatExport.Argument.End.Error.startRequired)
+				if (value < start) fail(I18n.ChatExport.Argument.End.Error.invalidRange)
+			}
         }
 
         val channel by optionalChannel {
@@ -256,10 +266,7 @@ class Base : Extension() {
     }
 }
 
-enum class Format: ChoiceEnum {
-    TXT {
-        override val readableName = I18n.ChatExport.Argument.Format.txt
-    }, HTML {
-        override val readableName = I18n.ChatExport.Argument.Format.html
-    }
+enum class Format(override val readableName: Key): ChoiceEnum {
+    TXT(I18n.ChatExport.Argument.Format.txt),
+	HTML(I18n.ChatExport.Argument.Format.html)
 }

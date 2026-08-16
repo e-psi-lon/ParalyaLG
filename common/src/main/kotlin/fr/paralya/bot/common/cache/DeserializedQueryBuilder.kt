@@ -15,6 +15,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 @OptIn(ExperimentalSerializationApi::class)
+@Suppress("LongParameterList")
 internal class DeserializedQueryBuilder<T : Any>(
     private val namespace: String,
     private val typeKey: String,

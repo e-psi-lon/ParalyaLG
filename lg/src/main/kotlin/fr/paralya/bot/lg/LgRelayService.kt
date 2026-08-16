@@ -32,11 +32,11 @@ import fr.paralya.bot.lg.data.getProfilePictureState
 import fr.paralya.bot.lg.data.setLastWerewolfMessageSender
 import fr.paralya.bot.lg.data.toggleProfilePicture
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.CancellationException
 import org.koin.core.component.get
 import org.koin.core.component.inject
 import kotlin.time.Duration.Companion.minutes
 import fr.paralya.bot.lg.I18n as Lg
-
 
 private const val MESSAGE_MAX_LENGTH = 2000
 class LgRelayService : KordExKoinComponent {
@@ -75,7 +75,7 @@ class LgRelayService : KordExKoinComponent {
             return
         }
 
-        logger.debug { "Message sender is ${message.author?.id?.value}" }
+        logger.debug { "Message sender is ${message.author?.id?.value ?: "not known"}" }
         val (userName, userAvatar) = getMessageIdentity(message.author, isAnonymous, true)
         logger.debug { "Avatar is $userAvatar and name is $userName" }
         val content = buildRelayContent(message)
@@ -89,8 +89,8 @@ class LgRelayService : KordExKoinComponent {
             bot,
             userName,
             userAvatar,
-            webhookName,
-            content
+            webhookName = webhookName,
+            message = content
         )
     }
 
@@ -110,6 +110,7 @@ class LgRelayService : KordExKoinComponent {
             val webhook = bot.getWebhook(outChannel, webhookName)
             try {
                 // Keep the NPE here, we want a loud error if it's null
+                @Suppress("UnsafeCallOnNullableType")
                 webhook.deleteMessage(webhook.token!!, oldMessage.id)
             } catch (e: RestRequestException) {
                 logger.error(e) { "Error while deleting message" }
@@ -133,15 +134,19 @@ class LgRelayService : KordExKoinComponent {
             @Suppress("TooGenericExceptionCaught")
             try {
                 // Keep the NPE here, we want a loud error if it's null
+                @Suppress("UnsafeCallOnNullableType")
                 webhook.getMessage(webhook.token!!, oldMessage.id).edit {
                     content = newMessage.content
-                    if (newMessage.referencedMessage != null) embed {
+                    val referencedMessage = newMessage.referencedMessage
+                    if (referencedMessage != null) embed {
                         title = Lg.Transmission.Reference.title.contextTranslate()
-                        description = newMessage.referencedMessage!!.content
+                        description = referencedMessage.content
                     } else embeds?.clear()
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (_: Exception) {
-                logger.debug { "Message sender is ${event.old?.author?.id?.value}" }
+                logger.debug { "Message sender is ${event.old?.author?.id?.value ?: "not known"}" }
                 val (userName, userAvatar) = getMessageIdentity(event.old?.author, isAnonymous)
                 logger.debug { "Avatar is $userAvatar and name is $userName" }
                 val content = buildRelayContent(newMessage) {
@@ -154,8 +159,8 @@ class LgRelayService : KordExKoinComponent {
                     bot,
                     userName,
                     userAvatar,
-                    webhookName,
-                    content
+                    webhookName = webhookName,
+                    message = content
                 )
             }
         }
@@ -235,9 +240,11 @@ class LgRelayService : KordExKoinComponent {
             botCache.setLastWerewolfMessageSender(author.id)
             botCache.toggleProfilePicture()
         }
-        (if (botCache.getProfilePictureState()) "🐺 Anonyme" else "🐺Anonyme") to
-                (if (botCache.getProfilePictureState()) "wolf_variant_2" else "wolf_variant_1")
-    } else (author?.username ?: "Message Author") to (author?.avatar?.cdnUrl?.toUrl() ?: "")
+        val profilePictureState = botCache.getProfilePictureState()
+        val name = if (profilePictureState) "🐺 Anonyme" else "🐺Anonyme"
+        val pp = if (profilePictureState) "wolf_variant_2" else "wolf_variant_1"
+        name to pp
+    } else (author?.username ?: "Message Author") to author?.avatar?.cdnUrl?.toUrl().orEmpty()
 
     context(ctx: EventContext<*>)
     private fun buildRelayContent(
@@ -246,10 +253,10 @@ class LgRelayService : KordExKoinComponent {
     ): suspend MessageBuilder.() -> Unit = {
         val botConfig = ctx.get<BotConfig>()
         content = message.content
-
-        if (message.referencedMessage != null && !message.referencedMessage!!.author.isAdmin(botConfig)) embed {
+        val referencedMessage = message.referencedMessage
+        if (referencedMessage != null && !referencedMessage.author.isAdmin(botConfig)) embed {
             title = Lg.Transmission.Reference.title.contextTranslate()
-            description = message.referencedMessage!!.content
+            description = referencedMessage.content
         }
 
         additionalElements?.invoke(this)
@@ -271,9 +278,10 @@ class LgRelayService : KordExKoinComponent {
             description = message.content
         }
         val botConfig = ctx.get<BotConfig>()
-        if (message.referencedMessage != null && !message.referencedMessage!!.author.isAdmin(botConfig)) embed {
+        val referencedMessage = message.referencedMessage
+        if (referencedMessage != null && !referencedMessage.author.isAdmin(botConfig)) embed {
             title = Lg.Transmission.Reference.title.contextTranslate()
-            description = message.referencedMessage!!.content
+            description = referencedMessage.content
         }
 
         additionalElements?.invoke(this)

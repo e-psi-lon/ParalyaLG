@@ -15,9 +15,9 @@ data class CachedData(
             append(namespace)
             append(":")
             append(key)
-            itemId?.let {
+            itemId?.let { id ->
                 append(":")
-                append(it)
+                append(id)
             }
         }
 

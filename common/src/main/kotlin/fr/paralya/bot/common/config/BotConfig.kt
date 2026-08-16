@@ -46,13 +46,10 @@ internal data class PrivateBotConfig(
         }
     }
 
-    override fun validate(): ValidationResult<PrivateBotConfig> {
-        return validator(this)
-    }
+    override fun validate(): ValidationResult<PrivateBotConfig> = validator(this)
 
-    override fun toString(): String {
-        return "PrivateBotConfig(token=***, admins=$admins, dmLogChannelId=$dmLogChannelId, paralyaId=$paralyaId)"
-    }
+    override fun toString(): String =
+        "PrivateBotConfig(token=***, admins=$admins, dmLogChannelId=$dmLogChannelId, paralyaId=$paralyaId)"
 
 
     fun toPublic() = BotConfig(admins, dmLogChannelId, paralyaId)

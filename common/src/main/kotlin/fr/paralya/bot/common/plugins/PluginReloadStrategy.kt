@@ -1,5 +1,8 @@
 package fr.paralya.bot.common.plugins
 
+import fr.paralya.bot.common.getExceptionOrNull
+import fr.paralya.bot.common.orNoMessage
+import fr.paralya.bot.common.runCatchingException
 import io.github.oshai.kotlinlogging.KLogger
 import org.pf4j.PluginRuntimeException
 import java.nio.file.Files
@@ -20,6 +23,7 @@ private sealed interface TeardownResult {
 
 
 // Not thread-safe, but reload operations aren't concurrent anyway
+@Suppress("VarCouldBeVal") // No it can't, the setter is just used internally
 private var tempDirectory: Path = Files.createTempDirectory("ParalyaBot-Reload")
     get() {
         if (!field.exists()) {
@@ -37,9 +41,8 @@ internal class PluginReloadStrategy(
     val newPluginZipPath: Path,
     private val logger: KLogger,
     private val workDirectory: Path
-) { 
+) {
 
-    @Suppress("ReturnCount")
     fun reload(): PluginReloadResult {
         val safeCopy = saveCopy()
         val safeNewPlugin = workDirectory.resolve(newPluginZipPath.fileName)
@@ -82,8 +85,8 @@ internal class PluginReloadStrategy(
 
 
     private fun teardown() = try {
-        val result = pluginManager.deletePlugin(pluginId)
-        if (result) {
+        val isDeleted = pluginManager.deletePlugin(pluginId)
+        if (isDeleted) {
             logger.info { "Plugin $pluginId successfully unloaded." }
             TeardownResult.OldPluginSuccessfulTeardown
         } else {
@@ -103,7 +106,8 @@ internal class PluginReloadStrategy(
         val loadedPluginId = pluginManager.loadPlugin(newPluginZipPath)
         if (pluginId != loadedPluginId) {
             logger.warn {
-                "Plugin $loadedPluginId was successfully loaded, but its ID doesn't match the old $pluginId."
+                "Plugin ${loadedPluginId ?: "<null plugin>"} was successfully loaded, " +
+                        "but its ID doesn't match the old $pluginId."
             }
         }
         if (loadedPluginId != null) {
@@ -116,21 +120,17 @@ internal class PluginReloadStrategy(
             )
         }
     } catch (e: PluginRuntimeException) {
-        logAndFail(e, "An error happened when loading: from path $newPluginZipPath: ${e.message}")
+        logAndFail(e, "An error happened when loading: from path $newPluginZipPath: ${e.message.orNoMessage()}")
     } catch (e: PluginValidationException) {
-        logAndFail(e, "Failed to load invalid plugin at path $newPluginZipPath: ${e.message}")
+        logAndFail(e, "Failed to load invalid plugin at path $newPluginZipPath: ${e.message.orNoMessage()}")
     } catch (e: IllegalArgumentException) {
-        logAndFail(e, "Failed to load the new plugin at path $newPluginZipPath: ${e.message}")
+        logAndFail(e, "Failed to load the new plugin at path $newPluginZipPath: ${e.message.orNoMessage()}")
     }
 
-    @Suppress("TooGenericExceptionCaught")
-    private fun tryStartPlugin(pluginToStartId: String) : Exception? = try {
+    private fun tryStartPlugin(pluginToStartId: String): Exception? = runCatchingException {
         pluginManager.startPlugin(pluginToStartId)
-        null
-    } catch (e: Exception) { // startPlugin starts the plugin's start method, which is unpredictable
-        logger.error(e) { "Failed to start the new plugin $pluginToStartId." }
-        e
-    }
+    }.onFailure { e -> logger.error(e) { "Failed to start the new plugin $pluginToStartId." } }
+    .getExceptionOrNull()
 
     @Suppress("ReturnCount")
     private fun fallback(safeCopy: Path, originalException: Exception) : PluginReloadResult {
@@ -150,18 +150,18 @@ internal class PluginReloadStrategy(
                 logger.info { "Successfully reloaded the old plugin $pluginId." }
             } else {
                 logger.error(exception) { "Failed to start the old plugin $pluginId." }
-                return OldPluginFallbackFailedToLoad(originalException, exception)
+                return OldPluginFallbackFailedToLoad(originalException, fallbackException = exception)
             }
             return OldPluginReusedAsFallback(originalException)
         } catch (e: PluginRuntimeException) {
             logger.error(e) { "Failed to load the old plugin $pluginId." }
-            return OldPluginFallbackFailedToLoad(originalException, e)
+            return OldPluginFallbackFailedToLoad(originalException, fallbackException = e)
         } catch (e: PluginValidationException) {
             logger.error(e) { "Failed to load the old plugin $pluginId: invalid plugin." }
-            return OldPluginFallbackFailedToLoad(originalException, e)
+            return OldPluginFallbackFailedToLoad(originalException, fallbackException = e)
         } catch (e: IllegalArgumentException) {
             logger.error(e) { "Failed to load the old plugin $pluginId: invalid plugin path." }
-            return OldPluginFallbackFailedToLoad(originalException, e)
+            return OldPluginFallbackFailedToLoad(originalException, fallbackException = e)
         }
     }
 

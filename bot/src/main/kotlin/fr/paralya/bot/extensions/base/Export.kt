@@ -5,6 +5,7 @@ import dev.kord.core.behavior.GuildBehavior
 import dev.kord.core.behavior.channel.MessageChannelBehavior
 import dev.kord.core.entity.Embed
 import dev.kord.core.entity.Message
+import dev.kord.core.entity.channel.TextChannel
 import dev.kord.rest.builder.message.create.FollowupMessageCreateBuilder
 import fr.paralya.bot.common.getResource
 import io.ktor.client.request.forms.ChannelProvider
@@ -125,7 +126,7 @@ suspend fun FollowupMessageCreateBuilder.addHtmlExport(
     val guildName = guild?.asGuildOrNull()?.name ?: "Pas de nom de serveur"
     val guildIcon = guild?.asGuildOrNull()?.icon?.cdnUrl ?: ""
     val channelName = guild?.getChannel(channel.id)?.name ?: "Pas de nom de salon"
-    val channelTopic = (channel.asChannelOrNull() as? dev.kord.core.entity.channel.TextChannel)?.topic
+    val channelTopic = (channel.asChannelOrNull() as? TextChannel)?.topic
     val start = arguments.start
 
     val lastMessageId = messages.lastOrNull()?.id

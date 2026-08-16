@@ -5,6 +5,8 @@ import fr.paralya.bot.common.CommonModule
 import fr.paralya.bot.common.plugins.Plugin
 import fr.paralya.bot.lg.data.LgConfig
 
+internal const val BOT_NICKNAME = "ParalyaLG"
+internal const val PROFILE_PICTURE = "paralya_lg"
 /**
  * The main plugin class for the Werewolf (Loup-Garou) game.
  *
@@ -23,7 +25,6 @@ class LgPlugin : Plugin() {
 	 * Setup function that initializes the plugin.
 	 */
 	override suspend fun onSetup() {
-		registerComponent(this)
 		registerComponent(::VoteManager)
 		registerComponent(::LgRelayService)
 		extension(::LG)

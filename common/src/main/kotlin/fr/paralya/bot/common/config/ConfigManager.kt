@@ -8,6 +8,7 @@ import dev.kordex.core.builders.ExtensibleBotBuilder
 import dev.kordex.core.koin.KordExKoinComponent
 import dev.kordex.core.utils.loadModule
 import fr.paralya.bot.common.InternalBotApi
+import fr.paralya.bot.common.orUnknownClass
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -36,7 +37,6 @@ import kotlin.io.path.writeText
 class ConfigManager internal constructor(private val configFile: Path) : KordExKoinComponent {
 	private val logger = KotlinLogging.logger("ConfigManager")
 
-	constructor() : this(Path(System.getenv("PARALYA_BOT_CONFIG_FILE") ?: "config.conf"))
 
 	private var state: ConfigState = try {
 		loadState()
@@ -52,6 +52,8 @@ class ConfigManager internal constructor(private val configFile: Path) : KordExK
 	// Core bot configuration, directly integrated into the ConfigManager
 	val botConfig: BotConfig
 		get() = state.botConfig.toPublic()
+
+	constructor() : this(Path(System.getenv("PARALYA_BOT_CONFIG_FILE") ?: "config.conf"))
 
 	/**
 	 * Loads the configuration file into a [ConfigState] object
@@ -90,17 +92,17 @@ class ConfigManager internal constructor(private val configFile: Path) : KordExK
 	private fun createDefaultConfig() {
 		configFile.writeText(
 			"""
-            |bot {
-            |    token = ""
-            |    admins = []
+			|bot {
+			|    token = ""
+			|    admins = []
 			|    dmLogChannelId = 0
 			|    paralyaId = 0
-            |}
+			|}
 			|
-            |# Game-specific configurations will be added here
-            |games {
-            |}
-        """.trimMargin()
+			|# Game-specific configurations will be added here
+			|games {
+			|}
+        	""".trimMargin()
 		)
 		logger.error { "Default config created at ${configFile.absolutePathString()}. Please fill in required values." }
 		throw MissingConfigException()
@@ -146,7 +148,9 @@ class ConfigManager internal constructor(private val configFile: Path) : KordExK
 
 	private fun <T : ValidatedConfig> getConfigObject(serializer: KSerializer<T>, className: String?, name: String): T? {
 		val actualName = name.lowercase()
-        logger.debug { "Registering config for $name at path games.$actualName with datatype $className" }
+        logger.debug {
+			"Registering config for $name at path games.$actualName with datatype ${className.orUnknownClass()}"
+		}
         val configObject = try {
             Hocon.decodeFromConfig(serializer, getSubConfig("games.$actualName"))
         } catch (e: IllegalArgumentException) {
@@ -168,7 +172,7 @@ class ConfigManager internal constructor(private val configFile: Path) : KordExK
 
 	private fun validateConfig(config: ValidatedConfig) {
 		val result = config.validate()
-		if (result.isValid) logger.info { "Configuration for ${config::class.simpleName} is valid." }
+		if (result.isValid) logger.info { "Configuration for ${config::class.simpleName.orUnknownClass()} is valid." }
 		else throw InvalidConfigException(config::class.simpleName, result.errors)
 	}
 

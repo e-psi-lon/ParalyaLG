@@ -41,14 +41,11 @@ fun <C : SlashCommandContext<*, A, M>, A : Arguments, M : ModalForm> SlashComman
  * Extension function to check if a user is an admin based on the given [config]
  * @return true if the user is an admin, false otherwise.
  */
-fun User?.isAdmin(config: BotConfig): Boolean {
-	return this != null && config.admins.contains(id.value)
-}
+fun User?.isAdmin(config: BotConfig): Boolean = this != null && config.admins.contains(id.value)
+
 
 /**
  * Extension function to check if a member is an admin based on the given [config]
  * @return true if the member is an admin, false otherwise.
  */
-fun Member?.isAdmin(config: BotConfig): Boolean {
-	return this != null && config.admins.contains(id.value)
-}
+fun Member?.isAdmin(config: BotConfig): Boolean =  this != null && config.admins.contains(id.value)

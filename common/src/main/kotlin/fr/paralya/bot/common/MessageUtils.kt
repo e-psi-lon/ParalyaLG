@@ -28,7 +28,6 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-
 private val logger = KotlinLogging.logger("MessageUtils")
 
 /**
@@ -38,18 +37,19 @@ private val logger = KotlinLogging.logger("MessageUtils")
  * @param messageBuilder A lambda to build the message content.
  * @return The sent message.
  */
+@Suppress("InjectDispatcher")
 suspend fun MessageChannelBehavior.sendTemporaryMessage(
 	delay: Duration = 10.seconds,
 	messageBuilder: UserMessageCreateBuilder.() -> Unit
 ): Message {
-	return createMessage(messageBuilder).also {
-		it.kord.launch(
-			context = Dispatchers.IO + CoroutineName("TemporaryMessageDeletion-${it.id}"),
+	return createMessage(messageBuilder).also { message ->
+		message.kord.launch(
+			context = Dispatchers.IO + CoroutineName("TemporaryMessageDeletion-${message.id}"),
 		) {
 			delay(delay)
 			try {
 				withContext(NonCancellable + Dispatchers.IO) {
-					it.delete()
+					message.delete()
 				}
 			} catch (e: RestRequestException) {
 				logger.error(e) { "Failed to delete temporary message" }
@@ -102,14 +102,15 @@ suspend fun MessageChannelBehavior.getCorrespondingMessage(message: Message): Me
 		.filter { it.timestamp >= date }
 		.toList()
 		.sortedBy { it.timestamp }
-		.firstOrNull { areMessagesSimilar(message, it) }
+		.firstOrNull { areMessagesSimilar(msg1 = message, msg2 = it) }
 
 	if (beforeMessage != null) return beforeMessage
 	return getMessagesAfter(Snowflake.min, MESSAGE_SEARCH_RANGE)
 		.filter { it.timestamp <= date }
 		.toList()
 		.sortedByDescending { it.timestamp }
-		.firstOrNull { areMessagesSimilar(message, it) } ?: run {
+		.firstOrNull { areMessagesSimilar(msg1 = message, msg2 = it) }
+		?: run {
 			logger.warn {
 				"No corresponding similar message found for message ${message.id} when searching in channel $id"
 			}
@@ -156,7 +157,7 @@ fun ReactionEmoji.format(): String {
  * @param emoji The emoji to add (Unicode or custom emoji format)
  */
 fun MessageCreateBuilder.appendEmoji(emoji: String) {
-	content = (content ?: "") + emoji
+	content = content.orEmpty() + emoji
 }
 
 
@@ -169,6 +170,7 @@ fun MessageCreateBuilder.appendEmoji(emoji: String) {
  * @param avatar An optional avatar image for the webhook. If not provided, Discord's default avatar will be used.
  * @return The retrieved or newly created webhook.
  */
+@Suppress("SuspendFunWithCoroutineScopeReceiver")
 suspend fun Kord.getWebhook(channel: Snowflake, name: String, avatar: Image? = null): Webhook {
 	val existing = rest.webhook.getChannelWebhooks(channel)
 		.firstOrNull { it.name == name }
@@ -203,8 +205,8 @@ suspend fun Snowflake.sendAsWebhook(
 	message: suspend WebhookMessageCreateBuilder.() -> Unit
 ): Message? {
 	val webhook = bot.getWebhook(this, webhookName ?: name, avatar)
-	return webhook.token?.let {
-		webhook.execute(it) {
+	return webhook.token?.let { token ->
+		webhook.execute(token) {
 			username = name
 			message()
 		}
@@ -229,8 +231,8 @@ suspend fun Snowflake.sendAsWebhook(
 	message: suspend WebhookMessageCreateBuilder.() -> Unit
 ): Message? {
 	val webhook = bot.getWebhook(this, webhookName ?: name)
-	return webhook.token?.let {
-		webhook.execute(it) {
+	return webhook.token?.let { token ->
+		webhook.execute(token) {
 			avatarUrl = avatar
 			username = name
 			message()

@@ -20,13 +20,13 @@ sealed class GamePhase {
         override val type: PhaseType get() = PhaseType.NIGHT
     }
 
+    val isDay: Boolean get() = this is Day
+    val isNight: Boolean get() = this is Night
+
     fun next(): GamePhase = when (this) {
         is Day -> Night(number)
         is Night -> Day(number + 1)
     }
-
-    val isDay: Boolean get() = this is Day
-    val isNight: Boolean get() = this is Night
 
     enum class PhaseType {
         DAY, NIGHT

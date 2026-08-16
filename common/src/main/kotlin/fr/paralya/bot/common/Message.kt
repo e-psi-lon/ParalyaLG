@@ -14,7 +14,7 @@ const val MAX_MESSAGE_LENGTH = 2000
  * @property title The title of the modal form.
  * @property message The message field of the modal form.
  */
-open class Message : ModalForm() {
+open class MessageForm : ModalForm() {
 	override var title: Key = Modal.Message.title
 
 	val message = paragraphText {

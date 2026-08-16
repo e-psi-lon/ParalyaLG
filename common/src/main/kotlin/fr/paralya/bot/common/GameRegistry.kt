@@ -6,7 +6,6 @@ import dev.kordex.i18n.Key
 import dev.kordex.i18n.I18n as KI18n
 import dev.kordex.core.koin.KordExKoinComponent
 
-
 /**
  * [GameRegistry] is a singleton class that manages game modes for the bot.
  * It allows for the registration, retrieval, and unloading of game modes.

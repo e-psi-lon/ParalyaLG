@@ -25,6 +25,7 @@ import fr.paralya.bot.lg.data.LgConfig
 import fr.paralya.bot.lg.data.VoteResult
 import fr.paralya.bot.lg.data.getChannel
 import fr.paralya.bot.lg.data.nextPhase
+import fr.paralya.bot.lg.data.setChoices
 import fr.paralya.bot.lg.I18n as Lg
 import kotlinx.coroutines.flow.toList
 import org.koin.core.component.get
@@ -56,8 +57,8 @@ suspend fun <A : Arguments, M : ModalForm> PublicSlashCommand<A, M>.registerDayC
 
 		adminOnly {
 			val guild = guild ?: return@adminOnly
-			val force = arguments.force
-			val kill = arguments.kill
+			val isForcedResult = arguments.isForcedResult
+			val isKillEnabled = arguments.isKillEnabled
 			val botCache = lg.botCache
 			val gameData = botCache.getGameData()
 
@@ -71,13 +72,13 @@ suspend fun <A : Arguments, M : ModalForm> PublicSlashCommand<A, M>.registerDayC
 			val config = get<LgConfig>()
 			val aliveRole = config.aliveRole.snowflake
 			if (oldWerewolfVote?.votes?.isNotEmpty() == true) {
-				when (val result = voteManager.calculateVoteResult(oldWerewolfVote, kill, force)) {
+				when (val result = voteManager.calculateVoteResult(oldWerewolfVote, isKillEnabled, isForcedResult)) {
 					is VoteResult.NoVotes -> return@adminOnly
 					is VoteResult.Tie -> {
 						LgChannelType.LOUPS_VOTE.toId().sendAsWebhook(
 							lg.bot,
-							"ParalyaLG",
-							lg.pluginRef.getAsset("paralya_lg")) {
+							BOT_NICKNAME,
+							lg.pluginRef.getAsset(PROFILE_PICTURE)) {
 							content = Lg.DayCycle.Response.Other.equality.contextTranslate(
 								result.players.joinToString(", ") { "<@${it.value}>" }
 							)
@@ -92,9 +93,9 @@ suspend fun <A : Arguments, M : ModalForm> PublicSlashCommand<A, M>.registerDayC
 
 					is VoteResult.Killed -> {
 						guild.getMember(result.player).swapRoles(
-							config.deadRole.snowflake,
-							aliveRole,
-							Lg.System.Permissions.PlayerKilled.reason.contextTranslate()
+							addRoleId = config.deadRole.snowflake,
+							removeRoleId = aliveRole,
+							reason = Lg.System.Permissions.PlayerKilled.reason.contextTranslate()
 						)
 						respond {
 							content =
@@ -117,7 +118,8 @@ suspend fun <A : Arguments, M : ModalForm> PublicSlashCommand<A, M>.registerDayC
 			botCache.getChannel(LgChannelType.SUJETS)?.activeThreads?.changeLockAll(false)
 			botCache.getChannel(LgChannelType.LOUPS_CHAT)?.getMembersWithAccess()
 				?.filterByRole(aliveRole)
-				?.toList()?.forEach { member ->
+				?.toList()
+				?.forEach { member ->
 					val reason = Lg.System.Permissions.Day.reason.contextTranslate()
 					listOf(LgChannelType.LOUPS_VOTE, LgChannelType.LOUPS_CHAT).forEach { channelName ->
 						botCache.getChannel(channelName)?.getTopChannel()?.apply {
@@ -135,8 +137,8 @@ suspend fun <A : Arguments, M : ModalForm> PublicSlashCommand<A, M>.registerDayC
 
 		adminOnly {
 			val guild = guild ?: return@adminOnly
-			val force = arguments.force
-			val kill = arguments.kill
+			val isForcedResult = arguments.isForcedResult
+			val isKillEnabled = arguments.isKillEnabled
 			val botCache = lg.botCache
 			val gameData = botCache.getGameData()
 			if (gameData.phase.isNight) {
@@ -149,13 +151,13 @@ suspend fun <A : Arguments, M : ModalForm> PublicSlashCommand<A, M>.registerDayC
 			val config = get<LgConfig>()
 			val aliveRole = config.aliveRole.snowflake
 			if (oldVillageVote?.votes?.isNotEmpty() == true) {
-				val response = when (val result = voteManager.calculateVoteResult(oldVillageVote, kill, force)) {
+				val response = when (val result = voteManager.calculateVoteResult(oldVillageVote, isKillEnabled, isForcedResult)) {
 					is VoteResult.NoVotes -> return@adminOnly
 					is VoteResult.Tie -> {
 						LgChannelType.VOTES.toId().sendAsWebhook(
 							lg.bot,
-							"ParalyaLG",
-							lg.pluginRef.getAsset("paralya_lg"),
+							BOT_NICKNAME,
+							lg.pluginRef.getAsset(PROFILE_PICTURE),
 						) {
 							content = Lg.DayCycle.Response.Other.equality.contextTranslate(
 								result.players.joinToString(", ") { "<@${it.value}>" }
@@ -170,9 +172,9 @@ suspend fun <A : Arguments, M : ModalForm> PublicSlashCommand<A, M>.registerDayC
 
 					is VoteResult.Killed -> {
 						guild.getMember(result.player).swapRoles(
-							config.deadRole.snowflake,
-							aliveRole,
-							Lg.System.Permissions.PlayerKilled.reason.contextTranslate()
+							addRoleId = config.deadRole.snowflake,
+							removeRoleId = aliveRole,
+							reason = Lg.System.Permissions.PlayerKilled.reason.contextTranslate()
 						)
 						Lg.DayCycle.Response.Success.killed.contextTranslate(
 							guild.getMember(result.player).effectiveName
@@ -180,7 +182,6 @@ suspend fun <A : Arguments, M : ModalForm> PublicSlashCommand<A, M>.registerDayC
 					}
 				}
 				respond { content = response }
-				return@adminOnly
 			}
 			newVoteVillage.apply {
 				setChoices(emptyList())
@@ -192,7 +193,7 @@ suspend fun <A : Arguments, M : ModalForm> PublicSlashCommand<A, M>.registerDayC
 					?.getTopChannel()
 					?.run {
 						removeRolePermissions(aliveRole, Permission.ViewChannel, Permission.SendMessages)
-						id.sendAsWebhook(lg.bot,"ParalyaLG", lg.pluginRef.getAsset("paralya_lg")) {
+						id.sendAsWebhook(lg.bot, BOT_NICKNAME, lg.pluginRef.getAsset(PROFILE_PICTURE)) {
 							content = Lg.System.separator.contextTranslate()
 						}
 					}
@@ -202,7 +203,8 @@ suspend fun <A : Arguments, M : ModalForm> PublicSlashCommand<A, M>.registerDayC
 			botCache.getChannel(LgChannelType.SUJETS)?.activeThreads?.changeLockAll(true)
 			botCache.getChannel(LgChannelType.LOUPS_CHAT)?.getMembersWithAccess()
 				?.filterByRole(aliveRole)
-				?.toList()?.forEach { member ->
+				?.toList()
+				?.forEach { member ->
 					val reason = Lg.System.Permissions.Night.reason.contextTranslate()
 
 					WOLF_CHANNELS.forEach { channelName ->
@@ -230,16 +232,16 @@ suspend fun <A : Arguments, M : ModalForm> PublicSlashCommand<A, M>.registerDayC
  * It includes a force argument to force the transition and a kill argument to determine if a player should be
  * killed.
  *
- * @property force Indicates whether to force the transition.
- * @property kill Indicates whether to kill a player.
+ * @property isForcedResult Indicates whether to force the transition.
+ * @property isKillEnabled Indicates whether to kill the player.
  */
 private abstract class BaseDayCycleArguments : Arguments() {
-	val force by defaultingBoolean {
+	val isForcedResult by defaultingBoolean {
 		name = Lg.DayCycle.Argument.Force.name
 		description = getForceDescription()
 		defaultValue = false
 	}
-	val kill by defaultingBoolean {
+	val isKillEnabled by defaultingBoolean {
 		name = Lg.DayCycle.Argument.Kill.name
 		description = Lg.DayCycle.Argument.Kill.description
 		defaultValue = true

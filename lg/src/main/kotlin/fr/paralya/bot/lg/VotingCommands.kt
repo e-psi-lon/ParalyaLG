@@ -31,6 +31,7 @@ import org.koin.core.component.inject
  *
  * @receiver The instance of the [LG] extension that will handle the commands.
  */
+@Suppress("CognitiveComplexMethod", "CyclomaticComplexMethod", "LongMethod")
 context(lg: LG)
 suspend fun <A : Arguments, M : ModalForm> PublicSlashCommand<A, M>.registerVotingCommands() {
 	val voteManager by this.inject<VoteManager>()
@@ -77,7 +78,10 @@ suspend fun <A : Arguments, M : ModalForm> PublicSlashCommand<A, M>.registerVoti
 					return@action
 				}
 				val voteCount = voteManager.getVoteCount(vote)
-				val votersByTarget = vote.votes.entries.groupBy({ it.value }, { it.key })
+				val votersByTarget = vote.votes.entries.groupBy(
+					keySelector = { entry -> entry.value },
+					valueTransform = { entry -> entry.key }
+				)
 				respond {
 					embed {
 						title = Lg.Vote.List.Response.Success.Embed.title.contextTranslate()
@@ -88,7 +92,7 @@ suspend fun <A : Arguments, M : ModalForm> PublicSlashCommand<A, M>.registerVoti
 							field(guild.getMember(target).mention, inline = false) {
 								val playerNameList = votersByTarget[target]?.map {
 									guild.getMember(it).mention
-								}?.sorted()?.joinToString(", ", prefix = "(", postfix = ")") ?: ""
+								}?.sorted()?.joinToString(", ", prefix = "(", postfix = ")").orEmpty()
 
 								if (target == vote.corbeau) {
 									Lg.Vote.List.Response.Success.Embed.Field.WithCorbeau.description
@@ -181,7 +185,7 @@ suspend fun <A : Arguments, M : ModalForm> PublicSlashCommand<A, M>.registerVoti
 			}
 			val voteCount = voteManager.getVoteCount(currentVote)
 			val maxVotes = voteCount.values.maxOrNull() ?: 0
-			val mostVotedPlayers = voteCount.filter { it.value == maxVotes }.keys
+			val mostVotedPlayers = voteCount.filter { voteEntry -> voteEntry.value == maxVotes }.keys
 			if (mostVotedPlayers.size > 1) {
 				val members = mostVotedPlayers.map { playerId ->
 					val member = guild.getMember(playerId)
@@ -228,7 +232,6 @@ suspend fun <C : EphemeralSlashCommandContext<*, *>> C.validateVoteChannel(error
 	}
 }
 
-@Suppress("ReturnCount")
 context(lg: LG)
 private suspend fun <A : Arguments, M : ModalForm> EphemeralSlashCommandContext<A, M>.handleVote(
 	phase: PhaseType,
@@ -260,16 +263,16 @@ private suspend fun <A : Arguments, M : ModalForm> EphemeralSlashCommandContext<
 		respond { content = Lg.Vote.Response.Error.notInChoices.contextTranslate() }
 		return
 	}
-	val alreadyVoted = user.id in currentVote.votes
+	val hasAlreadyVoted = user.id in currentVote.votes
 	voteManager.vote(user.id, target)
 	respond { content = Lg.Vote.Response.Success.vote.contextTranslate(target.mention) }
 	voteChannelType.toId().sendAsWebhook(
 		lg.bot,
-		member?.asMember()?.effectiveName ?: "Inconnu",
+		member?.asMember()?.effectiveName ?: Lg.Vote.Response.Success.Public.unknownEffectiveName.contextTranslate(),
 		member?.asMember()?.avatar?.cdnUrl?.toUrl(),
 		"votes"
 	) {
-		content = getVotePublicResponse(target, reason, alreadyVoted)
+		content = getVotePublicResponse(target, reason, hasAlreadyVoted)
 	}
 }
 
@@ -285,11 +288,11 @@ private suspend fun <A : Arguments, M : ModalForm> EphemeralSlashCommandContext<
 suspend fun TranslatableContext.getVotePublicResponse(
 	target: User,
 	reason: String? = null,
-	alreadyVoted: Boolean = false,
+	hasAlreadyVoted: Boolean = false,
 ) = when {
-	alreadyVoted && reason != null ->
+	hasAlreadyVoted && reason != null ->
 		Lg.Vote.Response.Success.Public.changeReason.contextTranslate(target.mention, reason)
-	alreadyVoted -> Lg.Vote.Response.Success.Public.change.contextTranslate(target.mention)
+	hasAlreadyVoted -> Lg.Vote.Response.Success.Public.change.contextTranslate(target.mention)
 	reason != null -> Lg.Vote.Response.Success.Public.voteReason.contextTranslate(target.mention, reason)
 	else -> Lg.Vote.Response.Success.Public.vote.contextTranslate(target.mention)
 }

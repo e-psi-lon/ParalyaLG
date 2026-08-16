@@ -12,7 +12,6 @@ import dev.kord.core.entity.User
 import kotlinx.html.DIV
 import kotlinx.html.FlowContent
 import kotlinx.html.HEAD
-import kotlinx.html.HtmlTagMarker
 import kotlinx.html.a
 import kotlinx.html.div
 import kotlinx.html.id
@@ -24,20 +23,15 @@ import kotlinx.html.title
 import kotlinx.html.unsafe
 import kotlin.time.Instant
 
-@HtmlTagMarker
 fun HEAD.unsafeScript(js: String) = script { unsafe { +js } }
 
-@HtmlTagMarker
 inline fun FlowContent.preambleEntry(small: Boolean = false, crossinline block: DIV.() -> Unit) =
     div("preamble__entry" + if (small) " preamble__entry--small" else "", block)
 
-@HtmlTagMarker
 fun FlowContent.preambleEntry(content: String, small: Boolean = false) = preambleEntry(small) { +content }
 
-@HtmlTagMarker
 inline fun FlowContent.postambleEntry(crossinline block: DIV.() -> Unit) = div("postamble__entry", block)
 
-@HtmlTagMarker
 fun FlowContent.postambleEntry(content: String) = postambleEntry { +content }
 
 private val DISCORD_SYSTEM_MESSAGES_VISIBLE: Set<MessageType> = setOf(
@@ -89,12 +83,10 @@ private fun iconForMessageType(type: MessageType): String = when (type) {
     else -> "pencil-icon"
 }
 
-@HtmlTagMarker
 fun FlowContent.span(text: String) = span { +text }
 
 
 
-@HtmlTagMarker
 fun FlowContent.discordMessageContainer(message: Message, index: Int, mentionedUsers: List<User>) {
     val author = message.author
     val authorColor = author?.accentColor
@@ -197,20 +189,13 @@ fun FlowContent.discordMessageContainer(message: Message, index: Int, mentionedU
     }
 }
 
-@HtmlTagMarker
 fun DIV.attachmentBlock(attachment: Attachment) {}
-@HtmlTagMarker
 fun DIV.embedBlock(embed: Embed) {}
-@HtmlTagMarker
 fun DIV.replyBlock(referencedMessage: Message?) {}
-@HtmlTagMarker
 fun DIV.reactionsBlock(reactions: List<Reaction>) {}
-@HtmlTagMarker
 fun DIV.stickersBlock(stickers: List<Sticker>) {}
-@HtmlTagMarker
 fun DIV.invitesBlock(invites: List<Invite>) {}
 
-@HtmlTagMarker
 fun DIV.timestamp(timestamp: Instant, messageId: Snowflake, isSystem: Boolean = false) {
     span("chatlog__${if (isSystem) "system-notification-" else ""}timestamp") {
         title = formatDiscordTimestamp(timestamp)

@@ -36,7 +36,6 @@ import kotlinx.coroutines.flow.toList
 import org.koin.core.component.get
 import org.koin.core.component.inject
 
-
 private val requiredRoleChannels = listOf(
 	LgChannelType.LOUPS_CHAT,
 	LgChannelType.LOUPS_VOTE,
@@ -218,7 +217,7 @@ private suspend fun collectChannelsFromCategory(categoryId: Snowflake, guild: Gu
 			val channelName = channel.name
 				.replace(Regex("[^A-Za-z0-9_-]"), "")
 				.removePrefix("-")
-				.replace("-", "_")
+				.replace(oldValue = "-", newValue = "_")
 				.uppercase()
 
 			channelName to channel.id

@@ -16,6 +16,12 @@ import fr.paralya.bot.lg.data.VoteData
 import fr.paralya.bot.lg.data.VoteResult
 import fr.paralya.bot.lg.data.Voter
 import fr.paralya.bot.lg.data.getGameData
+import fr.paralya.bot.lg.data.setChoices
+import fr.paralya.bot.lg.data.setCurrent
+import fr.paralya.bot.lg.data.unvote
+import fr.paralya.bot.lg.data.unvoteCorbeau
+import fr.paralya.bot.lg.data.vote
+import fr.paralya.bot.lg.data.voteCorbeau
 import kotlinx.coroutines.sync.Mutex
 import org.koin.core.component.inject
 
@@ -74,12 +80,12 @@ class VoteManager : KordExKoinComponent {
 	 * Registers a vote from the Corbeau role
 	 * @param targetId The ID of the player being marked by the Corbeau
 	 */
-	suspend fun voteCorbeau(targetId: Target) = updateCurrentVote { it.voteCorbeau(targetId) }
+	suspend fun voteCorbeau(targetId: Target) = updateCurrentVote(PhaseType.DAY) { it.voteCorbeau(targetId) }
 
     /**
      * Removes the Corbeau's vote
      */
-	suspend fun unvoteCorbeau() = updateCurrentVote { it.unvoteCorbeau() }
+	suspend fun unvoteCorbeau() = updateCurrentVote(PhaseType.DAY) { it.unvoteCorbeau() }
 
 
 	/**
@@ -95,10 +101,8 @@ class VoteManager : KordExKoinComponent {
 	suspend fun createWerewolfVote(): VoteData = createVote(PhaseType.NIGHT)
 
 	private suspend fun createVote(phase: PhaseType)  = botCache.atomic(voteMutex) {
-		val newVote = (
-			getCurrentVote(phase) ?:
+		val newVote = getCurrentVote(phase) ?:
 			VoteData.createVote(phase, System.currentTimeMillis().snowflake, true)
-		)
 		putVote(newVote)
 		newVote
 	}
@@ -138,14 +142,14 @@ class VoteManager : KordExKoinComponent {
 	/**
 	 * Calculates the result of a vote
 	 * @param vote The vote data to calculate results for
-	 * @param kill Whether to kill the voted player
-	 * @param force Whether to force the vote result
+	 * @param isKillEnabled Whether to kill the voted player
+	 * @param isForcedResult Whether to force the vote result
 	 * @return The result of the vote as a VoteResult object
 	 */
 	fun calculateVoteResult(
 		vote: VoteData,
-		kill: Boolean,
-		force: Boolean
+		isKillEnabled: Boolean,
+		isForcedResult: Boolean
 	): VoteResult {
 		val voteCount = getVoteCount(vote)
 		if (voteCount.isEmpty()) return VoteResult.NoVotes
@@ -154,8 +158,8 @@ class VoteManager : KordExKoinComponent {
 		val maxVotedPlayers = voteCount.filter { it.value == maxVote }.keys
 
 		return when {
-			maxVotedPlayers.size > 1 && !force -> VoteResult.Tie(maxVotedPlayers.toList())
-			maxVotedPlayers.size == 1 && kill -> VoteResult.Killed(maxVotedPlayers.first())
+			maxVotedPlayers.size > 1 && !isForcedResult -> VoteResult.Tie(maxVotedPlayers.toList())
+			maxVotedPlayers.size == 1 && isKillEnabled -> VoteResult.Killed(maxVotedPlayers.first())
 			else -> VoteResult.NoVotes
 		}
 	}

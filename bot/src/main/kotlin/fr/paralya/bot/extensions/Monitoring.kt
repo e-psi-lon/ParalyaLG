@@ -1,4 +1,5 @@
 package fr.paralya.bot.extensions
+
 import dev.kord.rest.builder.message.create.FollowupMessageCreateBuilder
 import dev.kord.rest.builder.message.embed
 import dev.kordex.core.DISCORD_BLURPLE
@@ -46,6 +47,7 @@ class Monitoring : Extension() {
                 val newSnapshot = systemInfo.operatingSystem.getProcess(pid)
                 cpuState.update { current ->
                     val load = newSnapshot?.getProcessCpuLoadBetweenTicks(current.snapshot) // 0 when null
+                    @Suppress("MagicNumber")
                     CpuState(
                         snapshot = newSnapshot,
                         usage = load?.let { it / 100 } ?: current.usage
@@ -80,7 +82,7 @@ class Monitoring : Extension() {
             value = I18n.Monitoring.Response.Embed.Cpu.value.contextTranslate(
                 cpu.processorIdentifier.name.trim(),
                 runtime.availableProcessors(),
-                cpuState.value.usage?.let { "%.1f".format(it) } ?: "No CPU usage found"
+                cpuState.value.usage?.let { "%.1f".format(ctx.getLocale(), it) } ?: "No CPU usage found"
             )
             inline = true
         }
@@ -104,6 +106,7 @@ class Monitoring : Extension() {
         val heapTotal = runtime.totalMemory()
         val heapFree = runtime.freeMemory()
         val heapUsed = heapTotal - heapFree
+        @Suppress("MagicNumber")
         val heapPercent = heapUsed.toDouble() / heapMax * 100
         field {
             name = I18n.Monitoring.Response.Embed.Heap.name.contextTranslate()
@@ -111,7 +114,7 @@ class Monitoring : Extension() {
                 formatBytes(heapUsed),
                 formatBytes(heapTotal),
                 formatBytes(heapMax),
-                "%.1f".format(heapPercent)
+                "%.1f".format(ctx.getLocale(), heapPercent)
             )
             inline = true
         }

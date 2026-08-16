@@ -71,6 +71,7 @@ tasks {
                 const val API_VERSION = "${project.version}"
                 const val MIN_COMPATIBLE_VERSION = "${project.property("module.common.min-compatible-version")}"
             }
+			
         """.trimIndent())
 		}
 	}

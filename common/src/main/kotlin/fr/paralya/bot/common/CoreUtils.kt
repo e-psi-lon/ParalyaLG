@@ -41,6 +41,8 @@ suspend fun getAsset(path: String, game: String? = null, clazz: Class<*> = Resou
 
 
 suspend inline fun <reified T>getResourceFrom(path: String) = getResource(path, T::class.java)
+
+@Suppress("InjectDispatcher")
 suspend fun getResource(path: String, clazz: Class<*> = Resource.javaClass) : ByteArray {
     val resource = clazz.getResourceAsStream("/$path")
         ?: throw IllegalArgumentException("Resource at path /$path not found")
@@ -69,10 +71,9 @@ val ULong.snowflake get() = Snowflake(this)
  * @param roleId The ID of the role to filter by.
  * @return A flow of [Member] objects who have the specified role.
  */
-suspend fun Flow<Member>.filterByRole(roleId: Snowflake): Flow<Member> =
+fun Flow<Member>.filterByRole(roleId: Snowflake): Flow<Member> =
     filter { member -> member.roles.any { it.id == roleId } }
 
 fun Flow<Member>.filterByRole(role: RoleBehavior): Flow<Member> = filter { it.hasRole(role) }
-
 
 class ParalyaNotFoundException : ParalyaBotException("Paralya guild not found")

@@ -21,6 +21,7 @@ import fr.paralya.bot.I18n
 import fr.paralya.bot.botDeveloper
 import fr.paralya.bot.common.adminOnly
 import fr.paralya.bot.common.contextTranslate
+import fr.paralya.bot.common.getExceptionOrNull
 import fr.paralya.bot.common.plugins.OldPluginFailedToDelete
 import fr.paralya.bot.common.plugins.OldPluginFallbackFailedToLoad
 import fr.paralya.bot.common.plugins.OldPluginNotFound
@@ -34,15 +35,17 @@ import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.koin.core.component.inject
+import org.pf4j.PluginState
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension
 
-
 private const val CACHE_DURATION_MS = 1000L
+private const val CODE_BLOCK_WRAPPING = 8
 
+@Suppress("MaxLineLength")
 class PluginExtension : Extension() {
     override val name: String = "Plugins"
 
@@ -56,7 +59,7 @@ class PluginExtension : Extension() {
         action {
             respond {
                 val stringException = exception.stackTraceToString()
-                if (stringException.length < EmbedBuilder.Limits.description - 8) embed { // Account for the code block
+                if (stringException.length < EmbedBuilder.Limits.description - CODE_BLOCK_WRAPPING) embed { // Account for the code block
                     this.title = title
                     description = "```\n$stringException\n```"
                     color = DISCORD_RED
@@ -169,7 +172,7 @@ class PluginExtension : Extension() {
                     respond {
                         val state = result.getOrNull()
                         embed {
-                            title = if (state != null) I18n.Plugins.Start.Response.Success.Embed.title.contextTranslate()
+                            title = if (state != null && state == PluginState.STARTED) I18n.Plugins.Start.Response.Success.Embed.title.contextTranslate()
                             else I18n.Plugins.Start.Response.Error.Embed.title.contextTranslate()
 
                             description = if (state != null) {
@@ -182,12 +185,12 @@ class PluginExtension : Extension() {
                             }
                         }
                         components {
-                            val exception = result.exceptionOrNull()
+                            val exception = result.getExceptionOrNull()
                             if (exception != null) exceptionButton(
                                 I18n.Plugins.Lifecycle.Response.Error.Button.viewError,
                                 I18n.Plugins.Lifecycle.Response.Error.Button.viewError
                                     .contextTranslate(arguments.pluginPath),
-                                exception as Exception // Safe by construction
+                                exception
                             )
                         }
                     }
@@ -270,7 +273,7 @@ class PluginExtension : Extension() {
             }
         }
         autoComplete {
-            suggestStringMap(getAvailableZipFiles().associate { it.nameWithoutExtension to it.fileName.name })
+            suggestStringMap(getAvailableZipFiles().associate { zip -> zip.nameWithoutExtension to zip.fileName.name })
         }
     }
     inner class StartArguments : Arguments() {

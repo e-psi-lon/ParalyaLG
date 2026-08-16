@@ -6,6 +6,7 @@ import dev.kordex.i18n.Key
 import fr.paralya.bot.common.GameRegistry
 import fr.paralya.bot.common.config.ConfigManager
 import fr.paralya.bot.common.config.ValidatedConfig
+import fr.paralya.bot.common.orUnknownClass
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.core.component.inject
@@ -31,16 +32,18 @@ abstract class Plugin: KordExPlugin() {
     @PublishedApi
     internal val gameRegistry by inject<GameRegistry>()
 
-    val plugin: PluginWrapper? by lazy {
+    val pluginWrapper: PluginWrapper? by lazy {
         pluginManager.whichPlugin(this::class.java)
     }
 
     val pluginId: String by lazy {
-        plugin?.pluginId ?: error("Plugin ${this::class.simpleName} identifier couldn't be found.")
+        pluginWrapper?.pluginId ?:
+            error("Plugin ${this::class.simpleName.orUnknownClass()} identifier couldn't be found.")
     }
 
     val version: String by lazy {
-        plugin?.descriptor?.version ?: "unknown"
+        pluginWrapper?.descriptor?.version ?:
+            error("Plugin ${this::class.simpleName.orUnknownClass()} version couldn't be found.")
     }
 
     override suspend fun setup() {

@@ -11,4 +11,6 @@ data object OldPluginNotFound : PluginReloadError(null)
 class OldPluginFailedToDelete(exception: PluginRuntimeException? = null) : PluginReloadError(exception)
 
 class OldPluginReusedAsFallback(exception: Exception) : PluginReloadError(exception)
-class OldPluginFallbackFailedToLoad(exception: Exception, val fallbackException: Exception) : PluginReloadError(exception)
+class OldPluginFallbackFailedToLoad(exception: Exception, val fallbackException: Exception) :
+    PluginReloadError(exception)
+

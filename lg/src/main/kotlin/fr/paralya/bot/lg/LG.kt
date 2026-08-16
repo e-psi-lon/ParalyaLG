@@ -23,12 +23,14 @@ import fr.paralya.bot.common.contextTranslate
 import fr.paralya.bot.common.getAsset
 import fr.paralya.bot.common.sendAsWebhook
 import fr.paralya.bot.common.snowflake
-import fr.paralya.bot.common.Message
+import fr.paralya.bot.common.MessageForm
+import fr.paralya.bot.common.runCatchingException
 import fr.paralya.bot.lg.data.LgChannelType
 import fr.paralya.bot.lg.data.LgConfig
 import fr.paralya.bot.lg.data.getGameData
 import fr.paralya.bot.lg.I18n as Lg
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
 import org.koin.core.component.get
@@ -52,6 +54,7 @@ class LG : Extension() {
 	val botCache by lazy { kord.cache }
 	val pluginRef by inject<LgPlugin>()
 
+	@Suppress("ForbiddenComment")
 	// TODO: Add this to a parent class to avoid repetition with other extensions
 	override suspend fun setState(state: ExtensionState) {
 		try {
@@ -76,7 +79,7 @@ class LG : Extension() {
 			registerVotingCommands()
 			registerDayCycleCommands()
 
-			ephemeralSubCommand(::NotifArguments, ::Message) {
+			ephemeralSubCommand(::NotifArguments, ::MessageForm) {
 				name = Lg.Notif.Command.name
 				description = Lg.Notif.Command.description
 				action { modal ->
@@ -88,7 +91,7 @@ class LG : Extension() {
 					val failed = mutableListOf<String>()
 					try {
 						guild?.members?.collect { member ->
-							if (member.hasRole(arguments.role)) runCatching {
+							if (member.hasRole(arguments.role)) runCatchingException {
 								member.dm(
 									Lg.Notif.Content.main.contextTranslate(
 										modal?.message?.value ?: Lg.Notif.Content.error
@@ -97,6 +100,8 @@ class LG : Extension() {
 							}.onFailure { failed.add(member.username) }
 								.onSuccess { if (it == null) failed.add(member.username) }
 						}
+					} catch (e: CancellationException) {
+						throw e
 					} catch (e: IllegalStateException) {
 						respond { content = Lg.Notif.Response.failed.contextTranslate(e.message) }
 					}
@@ -114,9 +119,10 @@ class LG : Extension() {
 			ephemeralSubCommand(::InterviewArguments) {
 				name = Lg.Interview.Command.name
 				description = Lg.Interview.Command.description
-				action {
+				adminOnly {
+					val guild = guild ?: return@adminOnly
 					val interviewChannel =
-						guild?.getChannel(LgChannelType.INTERVIEW.toId()) as TopGuildChannel
+						guild.getChannel(LgChannelType.INTERVIEW.toId()) as TopGuildChannel
 					val user = arguments.user
 					interviewChannel.addOverwrite(
 						PermissionOverwrite.forMember(user.id, Permissions(Permission.SendMessages))
@@ -134,8 +140,8 @@ class LG : Extension() {
 
 					LgChannelType.ANNONCES_VILLAGE.toId().sendAsWebhook(
 						bot,
-						"ParalyaLG",
-						pluginRef.getAsset("paralya_lg")
+						BOT_NICKNAME,
+						pluginRef.getAsset(PROFILE_PICTURE)
 					) {
 						content = Lg.EndDay.Response.infoMessage.contextTranslate(day, hour, config.aliveRole)
 					}
@@ -159,9 +165,9 @@ class LG : Extension() {
                     val config = get<LgConfig>()
 
                     guild.getMember(target.id).swapRoles(
-                        config.deadRole.snowflake,
-                        config.aliveRole.snowflake,
-                        reason
+                        addRoleId = config.deadRole.snowflake,
+                        removeRoleId = config.aliveRole.snowflake,
+                        reason = reason
                     )
                     respond {
                         content = Lg.Kill.Response.success.contextTranslate(target.effectiveName, reason)

@@ -26,5 +26,5 @@ enum class LgChannelType {
 
 	context(extension: Extension)
     internal suspend fun toId() = extension.kord.cache.getChannelId(this) ?:
-		throw CacheException("Channel ID for $this not found in cache", this.name)
+		throw CacheException("Channel ID for $this not found in cache", element  = this.name)
 }
