@@ -30,6 +30,7 @@
         "bot"
         "lg"
         "sta"
+        "ai"
       ];
 
       utils = import ./nix/parse-properties.nix {
@@ -78,9 +79,14 @@
             inherit (deps) deps-compile;
             inherit (common) common-compile;
           };
+          ai-plugin = import ./nix/packages/plugins/ai.nix {
+            inherit mkGradleBuild build-logic;
+            inherit (deps) deps-compile;
+            inherit (common) common-compile;
+          };
         in
         {
-          inherit build-logic paralyabot-image lg-plugin;
+          inherit build-logic paralyabot-image lg-plugin ai-plugin;
           inherit (deps) deps-compile deps-runtime;
           inherit (common) common-compile common-runtime-deps common-runtime common-update;
           inherit (paralyabot) paralyabot-jar paralyabot-jar-deps paralyabot-jar-update;
@@ -88,6 +94,7 @@
           build-logic-update = build-logic.mitmCache.updateScript;
           deps-compile-update = deps.deps-compile.mitmCache.updateScript;
           lg-plugin-update = lg-plugin.mitmCache.updateScript;
+          ai-plugin-update = ai-plugin.mitmCache.updateScript;
         };
 
       devShells.${system}.default = import ./nix/shell.nix {

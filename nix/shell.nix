@@ -94,7 +94,7 @@ let
             echo "If no package is specified, updates all dependency lockfiles."
             ;;
         "")
-            for pkg_update in build-logic-update deps-compile-update common-update paralyabot-jar-update lg-plugin-update sta-plugin-update; do
+            for pkg_update in build-logic-update deps-compile-update common-update paralyabot-jar-update lg-plugin-update sta-plugin-update ai-plugin-update; do
                 if ! $(nix build .#''${pkg_update} --print-out-paths); then
                     echo "Error: Failed to update ''${pkg_update} dependencies. Check the output above for details." >&2
                 fi
