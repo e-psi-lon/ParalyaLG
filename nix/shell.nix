@@ -87,15 +87,16 @@ let
   '';
 
   update-deps = writeShellScriptBin "update-deps" ''
+    set -e
     case "''${1:-}" in
         --help|-h)
             echo "Usage: update-deps [PACKAGE]"
             echo "If no package is specified, updates all dependency lockfiles."
             ;;
         "")
-            for pkg-update in build-logic-update deps-compile-update common-update paralyabot-jar-update lg-plugin-update sta-plugin-update; do
-                if ! $(nix build .#''${pkg-update} --print-out-paths); then
-                    echo "Error: Failed to update ''${pkg-update} dependencies. Check the output above for details." >&2
+            for pkg_update in build-logic-update deps-compile-update common-update paralyabot-jar-update lg-plugin-update sta-plugin-update; do
+                if ! $(nix build .#''${pkg_update} --print-out-paths); then
+                    echo "Error: Failed to update ''${pkg_update} dependencies. Check the output above for details." >&2
                 fi
             done
             ;;
@@ -105,6 +106,10 @@ let
             fi
             ;;
     esac
+  '';
+
+  kordex-update = writeShellScriptBin "kordex-update" ''
+    ${builtins.readFile ./kordex-update.sh}
   '';
 in
 mkShell {
@@ -121,5 +126,6 @@ mkShell {
     build-plugin
     deploy-plugin
     update-deps
+    kordex-update
   ];
 }
