@@ -2,20 +2,20 @@
 kotlin = "2.3.21"
 jvm = "25"
 kordex-plugin = "1.9.2"
-kordex-library = "2.5.0-20260619.152041-2"
+kordex-library = "2.5.0-20260730.081749-3"
 kordex-data-api = "1.0.2-20260404.122759-5" # See build.gradle.kts for enforcement
-kord = "0.19.0-20260606.203219-15"
+kord = "0.19.0-20260811.145131-17"
 kordex-i18n = "1.1.1"
-logback = "1.5.34"
-shadow = "9.4.2"
-koin-test = "4.0.4"
+logback = "1.6.3"
+shadow = "9.6.1"
+koin-test = "4.2.2"
 mockk = "1.14.11"
 kotlinx-serialization-format = "1.11.0"
 konform = "0.11.1"
 kotlinx-html = "0.12.0"
-kover = "0.9.8"
-detekt = "2.0.0-alpha.5"
-junit = "6.1.0"
+kover = "0.9.9"
+detekt = "2.0.0-alpha.6"
+junit = "6.1.3"
 
 [libraries]
 logback = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
