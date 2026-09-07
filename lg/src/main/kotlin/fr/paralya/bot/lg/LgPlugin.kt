@@ -2,7 +2,7 @@ package fr.paralya.bot.lg
 
 import fr.paralya.bot.common.ApiVersion
 import fr.paralya.bot.common.CommonModule
-import fr.paralya.bot.common.plugins.Plugin
+import fr.paralya.bot.common.plugins.GamePlugin
 import fr.paralya.bot.lg.data.LgConfig
 
 internal const val BOT_NICKNAME = "ParalyaLG"
@@ -15,7 +15,7 @@ internal const val PROFILE_PICTURE = "paralya_lg"
  *
  */
 @ApiVersion(CommonModule.API_VERSION)
-class LgPlugin : Plugin() {
+class LgPlugin : GamePlugin() {
 	override val name = "LG"
 	override val key = I18n.GameMode.lg
 

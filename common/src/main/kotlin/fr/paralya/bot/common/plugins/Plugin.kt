@@ -21,7 +21,6 @@ import kotlin.lazy
 abstract class Plugin: KordExPlugin() {
     abstract val name: String
     abstract val key: Key
-    open val isGame = true
     @PublishedApi
     internal val components = mutableListOf<Module>()
 
@@ -29,8 +28,6 @@ abstract class Plugin: KordExPlugin() {
     @PublishedApi
     internal val configManager by inject<ConfigManager>()
     private val pluginManager by inject<PluginManager>()
-    @PublishedApi
-    internal val gameRegistry by inject<GameRegistry>()
 
     val pluginWrapper: PluginWrapper? by lazy {
         pluginManager.whichPlugin(this::class.java)
@@ -101,9 +98,7 @@ abstract class Plugin: KordExPlugin() {
 
     private fun removeAllRegistration() {
         configManager.unregisterConfig(name)
-        if (isGame) {
-            gameRegistry.unloadGameMode(name)
-        }
+        extraInternalUnregistration()
         getKoin().unloadModules(components)
     }
 
@@ -116,11 +111,14 @@ abstract class Plugin: KordExPlugin() {
         // This function is seemingly doing a lot of work, but
         // It is necessary to avoid too many indirections
         configManager.registerConfig<T>(name)
-        if (isGame) {
-            gameRegistry.registerGameMode(key, name)
-        }
+        extraInternalRegistration()
         return ConfigDefinition()
     }
+
+    @PublishedApi
+    internal open fun extraInternalRegistration() {}
+    internal open fun extraInternalUnregistration() {}
+
 
 
     private fun prepareRegistration() {
@@ -138,4 +136,17 @@ abstract class Plugin: KordExPlugin() {
     }
 
     class ConfigDefinition @PublishedApi internal constructor() // Marker class to force subclasses to call define<T>()
+}
+
+
+abstract class GamePlugin: Plugin() {
+    private val gameRegistry by inject<GameRegistry>()
+
+    final override fun extraInternalRegistration() {
+        gameRegistry.registerGameMode(key, name)
+    }
+
+    final override fun extraInternalUnregistration() {
+        gameRegistry.unloadGameMode(name)
+    }
 }

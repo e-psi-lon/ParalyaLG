@@ -11,7 +11,6 @@ internal const val PROFILE_PICTURE = "paralya_ai"
 class AiPlugin : Plugin() {
 	override val name = "AI"
 	override val key = I18n.Plugin.key
-	override val isGame = false
 
 	override fun defineConfig() = define<AiHelpConfig>()
 
