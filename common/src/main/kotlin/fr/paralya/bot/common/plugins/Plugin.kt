@@ -1,9 +1,12 @@
 package fr.paralya.bot.common.plugins
 
+import dev.kord.cache.api.data.DataDescription
+import dev.kord.cache.api.delegate.DelegatingDataCache
 import dev.kordex.core.koin.KordExKoinComponent
 import dev.kordex.core.plugins.KordExPlugin
 import dev.kordex.i18n.Key
 import fr.paralya.bot.common.GameRegistry
+import fr.paralya.bot.common.cache.unregister
 import fr.paralya.bot.common.config.ConfigManager
 import fr.paralya.bot.common.config.ValidatedConfig
 import fr.paralya.bot.common.orUnknownClass
@@ -24,6 +27,7 @@ abstract class Plugin: KordExPlugin() {
     @PublishedApi
     internal val components = mutableListOf<Module>()
 
+    private val cachedClasses = mutableSetOf<DataDescription<*, *>>()
 
     @PublishedApi
     internal val configManager by inject<ConfigManager>()
@@ -72,6 +76,11 @@ abstract class Plugin: KordExPlugin() {
         components.add(module)
     }
 
+    protected suspend fun <T: Any, I : Any>registerToCache(description: DataDescription<T, I>) {
+        kord.cache.register(description)
+        cachedClasses.add(description)
+    }
+
     /**
      * Register your plugin's config type by calling `define<T>()`.
      */
@@ -99,6 +108,11 @@ abstract class Plugin: KordExPlugin() {
     private fun removeAllRegistration() {
         configManager.unregisterConfig(name)
         extraInternalUnregistration()
+        @Suppress("UNCHECKED_CAST")
+        (kord.cache as? DelegatingDataCache)?.let { cache ->
+            cachedClasses.forEach { cache.unregister(it as DataDescription<Any, Any>) }
+            cachedClasses.clear()
+        } ?: log.warn("Could not unregister caches: not a DelegatingDataCache")
         getKoin().unloadModules(components)
     }
 

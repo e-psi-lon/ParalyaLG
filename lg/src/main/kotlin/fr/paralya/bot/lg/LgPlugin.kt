@@ -3,7 +3,9 @@ package fr.paralya.bot.lg
 import fr.paralya.bot.common.ApiVersion
 import fr.paralya.bot.common.CommonModule
 import fr.paralya.bot.common.plugins.GamePlugin
+import fr.paralya.bot.lg.data.GameData
 import fr.paralya.bot.lg.data.LgConfig
+import fr.paralya.bot.lg.data.VoteData
 
 internal const val BOT_NICKNAME = "ParalyaLG"
 internal const val PROFILE_PICTURE = "paralya_lg"
@@ -25,6 +27,8 @@ class LgPlugin : GamePlugin() {
 	 * Setup function that initializes the plugin.
 	 */
 	override suspend fun onSetup() {
+		registerToCache(GameData.description)
+		registerToCache(VoteData.description)
 		registerComponent(::VoteManager)
 		registerComponent(::LgRelayService)
 		extension(::LG)

@@ -1,5 +1,6 @@
 package fr.paralya.bot.lg.data
 
+import dev.kord.cache.api.data.description
 import dev.kord.common.entity.Snowflake
 import fr.paralya.bot.lg.data.GamePhase.PhaseType
 import kotlinx.serialization.Serializable
@@ -37,6 +38,8 @@ data class VoteData(
 		 * @return A new [VoteData] instance for the specified phase type
 		 */
 		fun createVote(type: PhaseType, id: Snowflake, isCurrent: Boolean = true) = VoteData(id, type, isCurrent)
+
+		val description = description<VoteData, Snowflake>(VoteData::id)
 	}
 }
 

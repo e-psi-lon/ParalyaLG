@@ -2,6 +2,7 @@
 package fr.paralya.bot.lg.data
 
 import dev.kord.cache.api.DataCache
+import dev.kord.cache.api.data.description
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.channel.TextChannel
 import dev.kordex.core.commands.application.ApplicationCommandContext
@@ -30,8 +31,11 @@ data class GameData(
 	val isProfilePictureFlipped: Boolean = false,
 	val channels: Map<String, Snowflake> = mapOf(),
 	val interviews: List<Snowflake> = listOf()
-)
-
+) {
+	companion object {
+		val description = description<GameData, GamePhase>(GameData::phase)
+	}
+}
 /**
  * Creates a copy of the current game data, advancing to the next day.
  * @return A new [GameData] instance with a phase set to DAY and dayCount incremented.
