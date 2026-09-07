@@ -14,7 +14,7 @@ version = property("paralyabot.version")!!
 
 kordEx {
     kordExVersion.set(libs.versions.kordex.library)
-    kordVersion.set(libs.versions.kord)
+    kordVersion.set(libs.versions.kord.core)
     bot {
         voice = false
         dataCollection(DataCollection.None)

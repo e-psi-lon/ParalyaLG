@@ -352,9 +352,11 @@
    "pom": "sha256-6NAtNAasx/wou/TMxbJu/RGYiTl41A5NLm2jaB/733U="
   },
   "org/jetbrains/kotlinx#kotlinx-serialization-core-jvm/1.7.3": {
-   "jar": "sha256-8K3eRYZBREdThc9Kp+C3/rJ/Yfz5RyZl7ZjMlxsGses=",
    "module": "sha256-c7tMAnk/h8Ke9kvqS6AlgHb01Mlj/NpjPRJI7yS0tO8=",
    "pom": "sha256-c09fdJII3QvvPZjKpZTPkiKv3w/uW2hDNHqP5k4kBCc="
+  },
+  "org/jetbrains/kotlinx#kotlinx-serialization-core-jvm/1.9.0": {
+   "jar": "sha256-Hwr6FyEQ5FpyMe8bRK6P2Eweuv+W8/w61o74xIEgtZw="
   },
   "org/jetbrains/kotlinx#kotlinx-serialization-json-jvm/1.4.1": {
    "module": "sha256-yPv95LXuHkGmkXUWXoOZkdFQFmWnWQ4jFiMmUBrGEiw=",
@@ -363,6 +365,9 @@
   "org/jetbrains/kotlinx#kotlinx-serialization-json/1.4.1": {
    "module": "sha256-6ZIjAK/2Y+VezvfT/KMFy2ChR1Wx+YDZQDnjwcq2Rcw=",
    "pom": "sha256-dkrPeeNju9YeyL+dUcOw2XzryNCLSTjDBiPA+vbRNaA="
+  },
+  "org/jetbrains/kotlinx#kotlinx-serialization-protobuf-jvm/1.9.0": {
+   "jar": "sha256-VVA1IFrRohJUtJ/Wtd2+atGrtce6uiRCWL11j4Boe8o="
   },
   "org/jetbrains/kotlinx#kover-jvm-agent/0.9.9": {
    "jar": "sha256-F8I1+HNPFIyOF/iuh8Q2nqZ+hToRa0bhYISxow9lpGc=",
@@ -426,13 +431,13 @@
   }
  },
  "https://snapshots-repo.kordex.dev/dev": {
-  "kordex#kord-extensions/2.5.0-20260730.081749-3/SNAPSHOT": {
-   "module": "sha256-geJxRCkFFj3EkD8kIiE/d0EmfTphrteR0vjR/xOnuKs="
+  "kordex#kord-extensions/2.7.0-20260907.114112-3/SNAPSHOT": {
+   "module": "sha256-DsMtBckDm+sY8IdqEahgBcIYFjl+64X4ItfMQ6Pn3mA="
   },
-  "kordex/kord-extensions/2.5.0-SNAPSHOT/maven-metadata": {
+  "kordex/kord-extensions/2.7.0-SNAPSHOT/maven-metadata": {
    "xml": {
     "groupId": "dev.kordex",
-    "lastUpdated": "20260730081749"
+    "lastUpdated": "20260907114112"
    }
   }
  }

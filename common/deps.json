@@ -399,7 +399,9 @@
    "pom": "sha256-O0/XwE1zlcr+fh4d7oSSYb/gPGjQVFlBjLNWBXUM2ic="
   },
   "org/jetbrains/kotlin#kotlin-stdlib/2.2.20": {
-   "jar": "sha256-iDbM/9NYX63amQEkSyDUKQHS881YEFjYQ04v+rzzo+c="
+   "jar": "sha256-iDbM/9NYX63amQEkSyDUKQHS881YEFjYQ04v+rzzo+c=",
+   "module": "sha256-yRj1IU0CGnLjdn8nVul9EDpSbgTxQj2jZj79+1hH25U=",
+   "pom": "sha256-SosIbmQxvPYjY39Ssv8ZLhrbkTg4dC5cDupwqN7kKcQ="
   },
   "org/jetbrains/kotlin#kotlin-stdlib/2.3.21": {
    "jar": "sha256-b2TqxzbblDTdaSW0pRi50dFxd2UjIMN5Fs+bo859fXo=",
@@ -432,6 +434,10 @@
    "jar": "sha256-+FQSbzmsvZY/1U4M0iYAChUadvciXuKBhdUvROJivvs=",
    "module": "sha256-vDyVbv4Yl2iOf7dYgY7XNUnOwtjRaQEFYS6rrTAmaRk=",
    "pom": "sha256-6NAtNAasx/wou/TMxbJu/RGYiTl41A5NLm2jaB/733U="
+  },
+  "org/jetbrains/kotlinx#kotlinx-io-core-jvm/0.6.0": {
+   "module": "sha256-tZuXjCxEJJpnRkGmlONaKs7LqBLah9NlpRZzQqjKU0c=",
+   "pom": "sha256-3DNkYsj1BEkGHNRdXLHI9oC+VEGqgQ6UQR/4GQmdT2s="
   },
   "org/jetbrains/kotlinx#kotlinx-serialization-bom/1.11.0": {
    "pom": "sha256-O+IhttqG3NpRysbEskBLielasJzI0GoFaJvi7zZzXew="
@@ -484,6 +490,15 @@
   "org/jetbrains/kotlinx#kotlinx-serialization-json/1.4.1": {
    "module": "sha256-6ZIjAK/2Y+VezvfT/KMFy2ChR1Wx+YDZQDnjwcq2Rcw=",
    "pom": "sha256-dkrPeeNju9YeyL+dUcOw2XzryNCLSTjDBiPA+vbRNaA="
+  },
+  "org/jetbrains/kotlinx#kotlinx-serialization-protobuf-jvm/1.11.0": {
+   "jar": "sha256-OkizlZtt31TZZ0vUtOMwJpSiTSQUGzjKmLasT8ZXZ18=",
+   "module": "sha256-9+u70Tc4KbXn5u+9Oip5agMtCfndbtOq3k4hZv4Y18w=",
+   "pom": "sha256-4vdLm3Bn73+R5cWvt2V+qalRaS99vQsQyN4UF17Dtmo="
+  },
+  "org/jetbrains/kotlinx#kotlinx-serialization-protobuf/1.11.0": {
+   "module": "sha256-k7YMdaNcZiFHPDJLIYc2q3PnhGbjdR9ZGWav3ZWCibA=",
+   "pom": "sha256-2ru/8VNoPIadPvsR6j4mCkQrLVQ8tVDDz0kRIXO/sMw="
   },
   "org/jetbrains/kotlinx#kover-jvm-agent/0.9.9": {
    "jar": "sha256-F8I1+HNPFIyOF/iuh8Q2nqZ+hToRa0bhYISxow9lpGc=",
@@ -552,13 +567,13 @@
   }
  },
  "https://snapshots-repo.kordex.dev/dev": {
-  "kordex#kord-extensions/2.5.0-20260730.081749-3/SNAPSHOT": {
-   "module": "sha256-geJxRCkFFj3EkD8kIiE/d0EmfTphrteR0vjR/xOnuKs="
+  "kordex#kord-extensions/2.7.0-20260907.114112-3/SNAPSHOT": {
+   "module": "sha256-DsMtBckDm+sY8IdqEahgBcIYFjl+64X4ItfMQ6Pn3mA="
   },
-  "kordex/kord-extensions/2.5.0-SNAPSHOT/maven-metadata": {
+  "kordex/kord-extensions/2.7.0-SNAPSHOT/maven-metadata": {
    "xml": {
     "groupId": "dev.kordex",
-    "lastUpdated": "20260730081749"
+    "lastUpdated": "20260907114112"
    }
   }
  }

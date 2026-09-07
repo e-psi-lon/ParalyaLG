@@ -4,7 +4,7 @@
 declare -a TARGETS=(
   "kordex-library|dev/kordex|annotations|https://snapshots-repo.kordex.dev"
   "kordex-data-api|dev/kordex|data/api|https://snapshots-repo.kordex.dev"
-  "kord|dev/kord|kord-core|https://snapshots.kord.dev"
+  "kord-core|dev/kord|kord-core|https://snapshots.kord.dev"
 )
 
 TOML_FILE="${1:-libs.versions.toml}"

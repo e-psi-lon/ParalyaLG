@@ -6,7 +6,7 @@ plugins {
 
 kordEx {
 	kordExVersion.set(libs.versions.kordex.library)
-	kordVersion.set(libs.versions.kord)
+	kordVersion.set(libs.versions.kord.core)
 	plugin {
 		id = "paralya-ai"
 		version = getVersion() as String

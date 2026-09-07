@@ -488,6 +488,11 @@
    "module": "sha256-/HbOg/UdsVJ2Re1p8R+g4hiAE/U02sCE5RarjOz5zuA=",
    "pom": "sha256-Q5AJNuQuGr7r5W9NlU/YTjZq2K8o1RrvjIvx1ILVAQY="
   },
+  "dev/kord/cache#cache-redis/0.6.0": {
+   "jar": "sha256-Kevjg88Bh6teP7lVYCtJkq6DP8RU8p1jU2XuT5rzqlM=",
+   "module": "sha256-nxY7qLDssL8/jSythU3zLzbfZkB57HI46KwxwDDC3/M=",
+   "pom": "sha256-FMo73JEKgqNaOjzwCVzbS67hGhAeYcl9ISa+iHHhUfU="
+  },
   "dev/whyoleg/sweetspi#sweetspi-bom/0.1.3": {
    "module": "sha256-w7MagO7FGGFVeFPJL49ZnxsOlOh1YFMtG4/SLkAmBq8=",
    "pom": "sha256-twTslQQNHW9wMzA2wwOGwX+GVWs8odKgNhewTDPmlCA="
@@ -707,6 +712,10 @@
    "module": "sha256-PZeRBXJBq9vbItiFNjr6jYFzoi/+8T5nL2qvLhAzrOA=",
    "pom": "sha256-m84hNt++sdNX0KGDE9aZS80wsCTwBo2oe8m/sIAXwho="
   },
+  "io/lettuce#lettuce-core/7.1.0.RELEASE": {
+   "jar": "sha256-2XT/2wRS5nWYX/ibPDP0Psm8iB8csffRQM+zA/iUOuY=",
+   "pom": "sha256-gA10KfpjiJDJwp/9P+4U4GV04rEkDm/ub9ZEUx3Y4EM="
+  },
   "io/mockk#mockk-agent-api-jvm/1.14.11": {
    "jar": "sha256-lFnX63aUtuADnhn30aid/Hrh+ngv+NOPKVK9of+jkkI=",
    "module": "sha256-3NDhTd259wnC52meBSvxiNAkR1w/E6w3KVpVMxcXVSI=",
@@ -751,6 +760,50 @@
   "io/mockk#mockk/1.14.11": {
    "module": "sha256-nxk+Lk3p4cfKxNixr/SP6FMXfEjSdB8j/W7tRvFYPFI=",
    "pom": "sha256-YVHJakt3W5ikDdi9s69/RJ4SFjG23T7oqME3gHqYF/w="
+  },
+  "io/netty#netty-buffer/4.2.4.Final": {
+   "jar": "sha256-ng3ULx6rxYQzli76MprNNy3zBcMKaljNF/6xzTL54ok=",
+   "pom": "sha256-YayQwoVv20mqh1+iPbM7XwOc3AfU8pO00Y5Wsts7EAo="
+  },
+  "io/netty#netty-codec-base/4.2.4.Final": {
+   "jar": "sha256-CvLBN6ijsmS68ViHRw2Faom/cSAloIZSwwOL//v+ZjQ=",
+   "pom": "sha256-+Rs+uU5/48eizc1rXkVTRUAgvu4hoxc03WZGOXLTXhc="
+  },
+  "io/netty#netty-codec-dns/4.2.4.Final": {
+   "jar": "sha256-1a9DvnQ1bv6HUgR45qtVEyycAj6WyZ4aQ48+WGDNXJ4=",
+   "pom": "sha256-tnI9dcDjKk0dPtZ0m9YwxIvXNWT/maXsdUla08WXifg="
+  },
+  "io/netty#netty-common/4.2.4.Final": {
+   "jar": "sha256-3VdEhGNmIVTDLgz6CZlgoW7aXwiWBQ5EGVsPwphjg38=",
+   "pom": "sha256-RXP+DQg7pRLmGQxP8OFeVp0LUT2E6Xw+1kgP/p2Z/iw="
+  },
+  "io/netty#netty-handler/4.2.4.Final": {
+   "jar": "sha256-UoC37ITUlAUbqZY5yGeTsE2STqfr2trBUo5m9P6Dksg=",
+   "pom": "sha256-yPVvwMYP9vqmTX29FwnDWm6B8/L24FaZyPMkH20KhVc="
+  },
+  "io/netty#netty-parent/4.2.4.Final": {
+   "pom": "sha256-Ri3r3EQgCvZiVkSS/wWtRVxe6HEdB1h+IGh+tmd+MG4="
+  },
+  "io/netty#netty-resolver-dns/4.2.4.Final": {
+   "jar": "sha256-I0Mlye+l8lg/wpHUfRIWgiKr+cra57VKVgWDrD2wi+E=",
+   "pom": "sha256-6HL/IN9EaDE2bODTyfT2/Zaryf77k1sX2kBmgHQDEmM="
+  },
+  "io/netty#netty-resolver/4.2.4.Final": {
+   "jar": "sha256-FStlMcD5CStqXEDJq3Cc+sJ15DO0wIBQF0B5DTmGOgw=",
+   "pom": "sha256-1jPP6gJtU2X+yBbtBTbr9CyMcuSNfqPBYs/b/aoZc68="
+  },
+  "io/netty#netty-transport-native-unix-common/4.2.4.Final": {
+   "jar": "sha256-0uT1oUevhUb1JQ8fp9G8CLDyjhXw8xlcfyTrsYYqQ8E=",
+   "pom": "sha256-Oel7uwR+M9yMUXn9M1q4hDKfIeJUAEg3QuYZiBT2sVg="
+  },
+  "io/netty#netty-transport/4.2.4.Final": {
+   "jar": "sha256-x4c4WLzyXVkhH5nT3TWlLWRO/FEWzQoAzUQCs9I8Y3I=",
+   "pom": "sha256-tq1ktxu0hdLgxgtaS5HQnb/UEymeZ5nn11kpRgmpfpY="
+  },
+  "io/projectreactor#reactor-core/3.6.6": {
+   "jar": "sha256-RPBV+9Aztsl2xT+y4EtZAn55+yMSw30uqlTHfqHqgP4=",
+   "module": "sha256-E+8o/h6KvxrUuk0kmT5o3Qw45VZ8ngO1SwKb5aJUQFk=",
+   "pom": "sha256-wWemkvYffqe8JLAi7lGZSW2QC0ZAhF6DX903KcY6Jp4="
   },
   "io/sentry#sentry/8.13.0": {
    "jar": "sha256-xlFCjo3suk2FAxuEbQ/PLlKPv8m29+b1md+B0LFzuZg=",
@@ -975,9 +1028,9 @@
    "module": "sha256-jSwdcXxzVG1WOC0TbIZQtZpxWZQBciY4GJNKzkTLBI0=",
    "pom": "sha256-SSISHT8LxgzkB/Ny3kLQKgt+lOddDD0VCLaDVyHySe8="
   },
-  "org/jetbrains/kotlin#kotlin-stdlib/2.2.20": {
-   "module": "sha256-yRj1IU0CGnLjdn8nVul9EDpSbgTxQj2jZj79+1hH25U=",
-   "pom": "sha256-SosIbmQxvPYjY39Ssv8ZLhrbkTg4dC5cDupwqN7kKcQ="
+  "org/jetbrains/kotlin#kotlin-stdlib/2.2.21": {
+   "module": "sha256-v7xlfd06jjfkyK1BeWjV6wsLFxyfzkj5YsKtMu5DTCE=",
+   "pom": "sha256-zzH5IxlsY67ezQpXwkJpvTcCpOR8C/C9ZLWtpd5SInI="
   },
   "org/jetbrains/kotlin#kotlin-stdlib/2.3.10": {
    "module": "sha256-6ocfZjGc2ierJSL6jZKRMdXm/LUzROT1TNrgMRHRUKo=",
@@ -1026,6 +1079,11 @@
   "org/jetbrains/kotlinx#kotlinx-coroutines-core/1.10.2": {
    "module": "sha256-j+JUF35xGnzRijwG2CQvzpRfQcLMoT3BmzOuQqVDUBY=",
    "pom": "sha256-UZ2lQACW80YqTa6AeDrQUEE9S8gex65T+udq7wzL7Uw="
+  },
+  "org/jetbrains/kotlinx#kotlinx-coroutines-reactive/1.10.2": {
+   "jar": "sha256-Eqe9T7TmoaWlX5oyzkvv/aVDA2zxT9EKB3KFOBqd+v4=",
+   "module": "sha256-qoeBkbRyJj4s3OsJ3W5YBug+aX2114vFFvqKy8pNjPo=",
+   "pom": "sha256-K714CprUVRtEMY7za5I9Vbs9ZLvTTZ3/r7YMb7hMlA0="
   },
   "org/jetbrains/kotlinx#kotlinx-coroutines-slf4j/1.10.2": {
    "jar": "sha256-1l3uPK+m97+u/ttJP8aLXGOr51BzT7ivkvrHoNMQFFc=",
@@ -1091,11 +1149,11 @@
    "pom": "sha256-gwOThZdv3ElCQfRXJVihNueyERbXJ5sm2vM1R4v6y1c="
   },
   "org/jetbrains/kotlinx#kotlinx-serialization-core-jvm/1.7.3": {
-   "jar": "sha256-8K3eRYZBREdThc9Kp+C3/rJ/Yfz5RyZl7ZjMlxsGses=",
    "module": "sha256-c7tMAnk/h8Ke9kvqS6AlgHb01Mlj/NpjPRJI7yS0tO8=",
    "pom": "sha256-c09fdJII3QvvPZjKpZTPkiKv3w/uW2hDNHqP5k4kBCc="
   },
   "org/jetbrains/kotlinx#kotlinx-serialization-core-jvm/1.9.0": {
+   "jar": "sha256-Hwr6FyEQ5FpyMe8bRK6P2Eweuv+W8/w61o74xIEgtZw=",
    "module": "sha256-cMh+MWGSq3cpqmOZIgKQ98jZ/dTZNC3J+cDkKFarNG0=",
    "pom": "sha256-hxkNQ05icv7WBa8PztFfa8CC2KVQQMUZjm1LLWovysI="
   },
@@ -1157,6 +1215,24 @@
   "org/jetbrains/kotlinx#kotlinx-serialization-json/1.4.1": {
    "module": "sha256-6ZIjAK/2Y+VezvfT/KMFy2ChR1Wx+YDZQDnjwcq2Rcw=",
    "pom": "sha256-dkrPeeNju9YeyL+dUcOw2XzryNCLSTjDBiPA+vbRNaA="
+  },
+  "org/jetbrains/kotlinx#kotlinx-serialization-protobuf-jvm/1.10.0": {
+   "jar": "sha256-Vj2JacPqx0BXyle5XuKusOTg7A9EQjTO8PkIqA+muww=",
+   "module": "sha256-QFZDNFqz2ZqUZZvOv0rvgAboOtA7btrBXq66PJa4ERg=",
+   "pom": "sha256-R9a+2NMlcsyjktowOeuNBo5IEnRFEpiOT7wDWTYQldA="
+  },
+  "org/jetbrains/kotlinx#kotlinx-serialization-protobuf-jvm/1.9.0": {
+   "jar": "sha256-VVA1IFrRohJUtJ/Wtd2+atGrtce6uiRCWL11j4Boe8o=",
+   "module": "sha256-p/t741TYikH7SYLX67JhwMBVlnV1vihfqaZZIOcPw20=",
+   "pom": "sha256-fZIz7eXK8jgiBAVsevV7Bdfwc1qL7C49KwdMeeBzyGQ="
+  },
+  "org/jetbrains/kotlinx#kotlinx-serialization-protobuf/1.10.0": {
+   "module": "sha256-P5j9AD7azty/SCtgHTy8ZxnpXE7n9vspohlwkUkJjIw=",
+   "pom": "sha256-kVpAWb16DNBtGkid9T0u8/V992N0ABl0Dr13l8Un6Yw="
+  },
+  "org/jetbrains/kotlinx#kotlinx-serialization-protobuf/1.9.0": {
+   "module": "sha256-mwFJcOIvn6AaDZtp6Hnc08FDY7cZxIn/T4IV/wNAyk0=",
+   "pom": "sha256-fGITTg4BarB1VpjDWLOZAXsIikBFkj7K/rI9CL4yQEc="
   },
   "org/jetbrains/kotlinx#kover-jvm-agent/0.9.9": {
    "jar": "sha256-F8I1+HNPFIyOF/iuh8Q2nqZ+hToRa0bhYISxow9lpGc=",
@@ -1234,6 +1310,13 @@
    "jar": "sha256-b+OLmUgCQvhoNV9IAkgIUaN8JMXre3hdobBrgjQYr1g=",
    "pom": "sha256-QOLAu5Hb0RUdzqSAKP4SQru+y4Xp2RXU5m8/yxYSeXg="
   },
+  "org/reactivestreams#reactive-streams/1.0.3": {
+   "pom": "sha256-zO1GcXX0JXgz9ssHUQ/5ezx1oG4aWNiCo515hT1RxgI="
+  },
+  "org/reactivestreams#reactive-streams/1.0.4": {
+   "jar": "sha256-91yll3ibPaxY9hhXuawuEDSmj6Zy2zUFWo+0UJ4yXyg=",
+   "pom": "sha256-VLoj2HotQ4VAyZ74eUoIVvxXOiVrSYZ4KDw8Z+8Yrag="
+  },
   "org/slf4j#slf4j-api/2.0.17": {
    "jar": "sha256-e3UdlSBhlU1av+1xgcH2RdM2CRtnmJFZHWMynGIuuDI=",
    "pom": "sha256-FQxAKH987NwhuTgMqsmOkoxPM8Aj22s0jfHFrJdwJr8="
@@ -1251,31 +1334,38 @@
   "org/sonatype/oss#oss-parent/7": {
    "pom": "sha256-tR+IZ8kranIkmVV/w6H96ne9+e9XRyL+kM5DailVlFQ="
   },
+  "org/sonatype/oss#oss-parent/9": {
+   "pom": "sha256-+0AmX5glSCEv+C42LllzKyGH7G8NgBgohcFO8fmCgno="
+  },
   "org/yaml#snakeyaml/2.4": {
    "jar": "sha256-73ea9dKand6MxwzgNB9cb3c14j7f+Whc6qnTU1m3u38=",
    "pom": "sha256-4VSjIxzWzeaKq/J0/RiWTUmpwaX16e079HHprnvfCOY="
+  },
+  "redis/clients/authentication#redis-authx-core/0.1.1-beta2": {
+   "jar": "sha256-zFbtsIs9+FYs3awQjcphkH0hzErQTeBen10bAQWDkK8=",
+   "pom": "sha256-ts6SnYo8uaOsuaueqQioOyDvMVbVTdNYnxkkMir/+yU="
   }
  },
  "https://snapshots-repo.kordex.dev/dev": {
-  "kordex#annotations/2.5.0-20260730.081749-3/SNAPSHOT": {
-   "jar": "sha256-paz3nLINf+ZUTCRkVGYR8bRoSYavh+eOuzKwqmOxH2k=",
-   "module": "sha256-BdevUqf8JR8z+BvXqN0xhsJGA3WzMA52VIkranRgnCg=",
-   "pom": "sha256-HWKLFNt/b9bJjsdfJUpkkfjywO6pkuxZHlwTz+BN0+A="
+  "kordex#annotations/2.7.0-20260907.114112-3/SNAPSHOT": {
+   "jar": "sha256-dm7q1GEqaJ3hHf0wTddHwA7U1hkx3s3dDP1z+aWMzSs=",
+   "module": "sha256-j9YNmLDRs8rfa/LLmQBvx9qHR0m/7HYU29SyEUml4EE=",
+   "pom": "sha256-FaD6j39BtJiPkz7FVkTWhZRcrq3We647eu1XD/3eZa0="
   },
-  "kordex#kord-extensions/2.5.0-20260730.081749-3/SNAPSHOT": {
-   "jar": "sha256-ft2LnsK5TYVJtQ4utaz1YMWZOI7Wu+2slex1Mmp0Ogs=",
-   "module": "sha256-geJxRCkFFj3EkD8kIiE/d0EmfTphrteR0vjR/xOnuKs=",
-   "pom": "sha256-TsTnWnm6inzEqYga3Jj8nK30Wss1+5eIE6y8+4PPTEs="
+  "kordex#kord-extensions/2.7.0-20260907.114112-3/SNAPSHOT": {
+   "jar": "sha256-ILpmTd2YiRVDfosOrzwYvkUCt2M0JSrR0VtXMQK9DUo=",
+   "module": "sha256-DsMtBckDm+sY8IdqEahgBcIYFjl+64X4ItfMQ6Pn3mA=",
+   "pom": "sha256-gdzFcMXPN8D0tRHqXkqnfJpUnWndSgc2qHEhL5gVIek="
   },
-  "kordex#token-parser/2.5.0-20260730.081749-3/SNAPSHOT": {
-   "jar": "sha256-WspvuhV9/KkFxfnbYsq6RwWoYS+zVkLtMCL6yM5HzAQ=",
-   "module": "sha256-iPKzKSCfXu0Aqai38Jn9+aasogTJbpiiq/JHShHIDbA=",
-   "pom": "sha256-bTrXA21wYw8CQf3V1qUa6L30kFHohfjn7Q2TKkTpuQQ="
+  "kordex#token-parser/2.7.0-20260907.114112-3/SNAPSHOT": {
+   "jar": "sha256-1MKkSJVURN3PomLGVwg/bWOY0/xt+akM1cTISvrGBlo=",
+   "module": "sha256-+OeZ5s2MSQY9f6Qz6Acp5SKv/mk1xobD0Di8x4qN2fc=",
+   "pom": "sha256-xzwaQY5k/88/KuVOpUzztDFWewpqcR9gYqEetb9tsj4="
   },
-  "kordex/annotations/2.5.0-SNAPSHOT/maven-metadata": {
+  "kordex/annotations/2.7.0-SNAPSHOT/maven-metadata": {
    "xml": {
     "groupId": "dev.kordex",
-    "lastUpdated": "20260730081749"
+    "lastUpdated": "20260907114112"
    }
   },
   "kordex/data#api/1.0.2-20260404.122759-5/SNAPSHOT": {
@@ -1289,16 +1379,16 @@
     "lastUpdated": "20260404122759"
    }
   },
-  "kordex/kord-extensions/2.5.0-SNAPSHOT/maven-metadata": {
+  "kordex/kord-extensions/2.7.0-SNAPSHOT/maven-metadata": {
    "xml": {
     "groupId": "dev.kordex",
-    "lastUpdated": "20260730081749"
+    "lastUpdated": "20260907114112"
    }
   },
-  "kordex/token-parser/2.5.0-SNAPSHOT/maven-metadata": {
+  "kordex/token-parser/2.7.0-SNAPSHOT/maven-metadata": {
    "xml": {
     "groupId": "dev.kordex",
-    "lastUpdated": "20260730081749"
+    "lastUpdated": "20260907114112"
    }
   }
  }

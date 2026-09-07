@@ -12,7 +12,7 @@ version = property("paralyabot.version")!!
 
 kordEx {
     kordExVersion.set(libs.versions.kordex.library)
-    kordVersion.set(libs.versions.kord)
+    kordVersion.set(libs.versions.kord.core)
 }
 
 repositories {
@@ -29,6 +29,7 @@ dependencies {
 
     // Exposed dependencies, for use in plugins
     api(libs.konform)
+    api(libs.kord.cache.redis)
     api(libs.kordex.i18n.runtime)
 }
 

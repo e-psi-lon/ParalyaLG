@@ -19,14 +19,21 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.withOptions
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
+import dev.kord.cache.redis.RedisConfiguration
+import dev.kord.core.cache.lruCache
 import dev.kordex.core.DISCORD_RED
 import dev.kordex.core.annotations.warnings.ReplacingDefaultErrorResponseBuilder
 import dev.kordex.i18n.generated.CoreTranslations
 import fr.paralya.bot.common.InternalBotApi
+import fr.paralya.bot.common.cache.redisCache
+import fr.paralya.bot.common.cache.redisCacheWithTtl
 import fr.paralya.bot.extensions.Monitoring
 import fr.paralya.bot.extensions.plugins.PluginExtension
 import org.slf4j.LoggerFactory
 import java.util.Locale
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 internal val botDeveloper = System.getenv("BOT_DEVELOPER_ID").toULong()
 
@@ -100,6 +107,34 @@ suspend fun buildBot(args: Array<String>): ExtensibleBot {
 		}
 
 		members { all() }
+
+		kord {
+			cache {
+				val redisConfig = RedisConfiguration {
+
+				}
+				defaultGenerator = redisCache(redisConfig)
+				presences(lruCache(50))
+				voiceState(lruCache(50))
+
+				messages(redisCacheWithTtl(redisConfig, 45.minutes))
+				guilds(redisCacheWithTtl(redisConfig, 7.days))
+
+				channels(redisCacheWithTtl(redisConfig, 2.days))
+				roles(redisCacheWithTtl(redisConfig, 2.days))
+
+				members(redisCacheWithTtl(redisConfig, 12.hours))
+
+				webhooks(redisCacheWithTtl(redisConfig, 2.days))
+
+				emojis(redisCacheWithTtl(redisConfig, 7.days))
+				stickers(redisCacheWithTtl(redisConfig, 7.days))
+				soundboardSounds(redisCacheWithTtl(redisConfig, 7.days))
+				autoModerationRules(redisCacheWithTtl(redisConfig, 7.days))
+				entitlements(redisCacheWithTtl(redisConfig, 7.days))
+				subscriptions(redisCacheWithTtl(redisConfig, 7.days))
+			}
+		}
 
 		presence { gameMode(null) }
 
