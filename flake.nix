@@ -1,7 +1,7 @@
 {
   description = "The official flake for ParalyaBot, the Discord bot of the Paralya server.";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/release-25.11";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/release-26.05";
 
   outputs =
     { self, nixpkgs }:
@@ -99,7 +99,7 @@
 
       devShells.${system}.default = import ./nix/shell.nix {
         inherit lib project-jdk;
-        inherit (pkgs) writeShellScriptBin mkShell;
+        inherit (pkgs) writeShellScriptBin mkShell go;
         inherit (utils) extractVersion;
       };
     };
