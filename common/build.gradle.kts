@@ -58,21 +58,28 @@ tasks {
 
 	register("generateVersion") {
 		description = "Generates a Kotlin object containing the common module's version information"
+
+		val apiVersion = project.version.toString()
+		val minCompatibleVersion = project.property("module.common.min-compatible-version").toString()
+		inputs.property("apiVersion", apiVersion)
+		inputs.property("minCompatibleVersion", minCompatibleVersion)
+
 		val outputDir = layout.buildDirectory.dir("generated/version/main/kotlin/fr/paralya/bot/common")
 		outputs.dir(outputDir)
 
 		doLast {
 			val versionFile = outputDir.get().asFile.resolve("CommonModule.kt")
 			versionFile.parentFile.mkdirs()
-			versionFile.writeText("""
+			versionFile.writeText(
+				"""
             package fr.paralya.bot.common
             
             object CommonModule {
-                const val API_VERSION = "${project.version}"
-                const val MIN_COMPATIBLE_VERSION = "${project.property("module.common.min-compatible-version")}"
+                const val API_VERSION = "$apiVersion"
+                const val MIN_COMPATIBLE_VERSION = "$minCompatibleVersion"
             }
-			
-        """.trimIndent())
+            """.trimIndent()
+			)
 		}
 	}
 
