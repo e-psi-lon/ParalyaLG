@@ -1,5 +1,6 @@
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.withType
+import kotlin.collections.filter
 
 plugins {
 	kotlin("jvm")
@@ -21,6 +22,16 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+
+tasks.register("nixDownloadDepsFixed") {
+	notCompatibleWithConfigurationCache("Meant for forced resolving of every dependency, making configuration caching irrelevant/incompatible with the intended behavior")
+    description = "A fixed version of the task used by Nixpks to forcefully download dependencies."
+	doLast {
+		configurations.filter { it.isCanBeResolved }.forEach { it.resolve() }
+		buildscript.configurations.filter { it.isCanBeResolved }.forEach { it.resolve() }
+	}
 }
 
 repositories {

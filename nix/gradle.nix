@@ -29,7 +29,7 @@ in
   versionProperty ? "paralyabot.version",
   artifactVersion ? extractVersion versionProperty,
   task,
-  updateTask ? if module == "." then ":nixDownloadDeps" else ":${module}:nixDownloadDeps",
+  updateTask ? ":${module}:nixDownloadDepsFixed",
   srcRoots ? [ ],
   depsData ? ../${module}/deps.json,
   buildDependencies ? [ ],

@@ -26,7 +26,7 @@ let
       ./common.nix
     ];
     task = "common:jar";
-    updateTask = "common:nixDownloadDeps";
+    updateTask = "common:nixDownloadDepsFixed";
   };
 
   common-runtime-deps = mkGradleBuild (sharedArgs // {

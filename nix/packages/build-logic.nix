@@ -8,7 +8,7 @@ mkGradleBuild {
   versionProperty = "module.build-logic.version";
   module = "build-logic";
   task = "build-logic:build";
-  updateTask = "build-logic:build";
+  updateTask = "build-logic:dependencies --write-verification-metadata sha256";
   installPhase = ''
     mkdir -p $out/build-logic/build $out/gradle-home
     cp -r build-logic/build/. $out/build-logic/build/
