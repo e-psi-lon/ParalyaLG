@@ -5,6 +5,10 @@ declare -a TARGETS=(
   "kordex-library|dev/kordex|annotations|https://snapshots-repo.kordex.dev"
   "kordex-data-api|dev/kordex|data/api|https://snapshots-repo.kordex.dev"
   "kord-core|dev/kord|kord-core|https://snapshots.kord.dev"
+  "kord-voice|dev/kord|kord-voice|https://snapshots.kord.dev"
+  "kord-common|dev/kord|kord-common|https://snapshots.kord.dev"
+  "kord-gateway|dev/kord|kord-gateway|https://snapshots.kord.dev"
+  "kord-rest|dev/kord|kord-rest|https://snapshots.kord.dev"
 )
 
 TOML_FILE="${1:-libs.versions.toml}"

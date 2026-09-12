@@ -108,8 +108,8 @@ let
     esac
   '';
 
-  kordex-update = writeShellScriptBin "kordex-update" ''
-    ${builtins.readFile ./kordex-update.sh}
+  snapshot-update = writeShellScriptBin "snapshot-update" ''
+    ${builtins.readFile ./snapshot-update.sh}
   '';
 in
 mkShell {
@@ -126,6 +126,6 @@ mkShell {
     build-plugin
     deploy-plugin
     update-deps
-    kordex-update
+    snapshot-update
   ];
 }

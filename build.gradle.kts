@@ -5,16 +5,6 @@ val excludedDependencies = listOf(
 	// "io.sentry" to "sentry"
 )
 
-configurations.all {
-	excludedDependencies.forEach { (group, module) ->
-		exclude(group = group, module = module)
-	}
-	resolutionStrategy.dependencySubstitution {
-		substitute(module("dev.kordex.data:api"))
-			.using(module("dev.kordex.data:api:${libs.versions.kordex.data.api.get()}"))
-	}
-}
-
 plugins {
 	id("kotlin-common")
 	alias(libs.plugins.kordex.gradle) apply false
@@ -40,6 +30,39 @@ subprojects {
 			testImplementation(testFixtures(typesafeProjects.deps))
 			if (path != typesafeProjects.common.path)
 				compileOnly(typesafeProjects.common) // The common subproject serves as a base for all other subprojects
+		}
+	}
+
+	configurations.all {
+		excludedDependencies.forEach { (group, module) ->
+			exclude(group = group, module = module)
+		}
+		resolutionStrategy.dependencySubstitution {
+			val kordexModules = mapOf(
+				"annotations" to libraries.versions.kordex.library,
+				"token-parser" to libraries.versions.kordex.library
+			)
+			kordexModules.forEach { (artifact, version) ->
+				substitute(module("dev.kordex:$artifact"))
+					.using(module("dev.kordex:$artifact:${version.get()}"))
+			}
+			substitute(module("dev.kordex.data:api"))
+				.using(module("dev.kordex.data:api:${libraries.versions.kordex.data.api.get()}"))
+
+			val kordModules = mapOf(
+				"kord-core" to libraries.versions.kord.core,
+				"kord-voice" to libraries.versions.kord.voice,
+				"kord-common" to libraries.versions.kord.common,
+				"kord-gateway" to libraries.versions.kord.gateway,
+				"kord-rest" to libraries.versions.kord.rest,
+			)
+
+			kordModules.forEach { (artifact, version) ->
+				listOf(artifact, "$artifact-jvm").forEach { coordinate ->
+					substitute(module("dev.kord:$coordinate"))
+						.using(module("dev.kord:$coordinate:${version.get()}"))
+				}
+			}
 		}
 	}
 }
