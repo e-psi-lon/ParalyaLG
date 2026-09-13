@@ -19,6 +19,7 @@ import dev.kordex.core.ExtensibleBot
 import dev.kordex.core.events.EventContext
 import dev.kordex.core.koin.KordExKoinComponent
 import fr.paralya.bot.common.config.BotConfig
+import fr.paralya.bot.common.config.ConfigManager
 import fr.paralya.bot.common.contextTranslate
 import fr.paralya.bot.common.format
 import fr.paralya.bot.common.getAsset
@@ -44,6 +45,7 @@ class LgRelayService : KordExKoinComponent {
     private val bot by inject<ExtensibleBot>()
     private val plugin by inject<LgPlugin>()
     private val botCache by lazy { bot.kordRef.cache }
+    private val configManager by inject<ConfigManager>()
 
     private fun User?.shouldIgnore(botConfig: BotConfig) = this == null ||
             isAdmin(botConfig) || this.isBot || this.isSelf
@@ -54,7 +56,7 @@ class LgRelayService : KordExKoinComponent {
         outChannel: Snowflake,
         isAnonymous: Boolean
     ) {
-        val botConfig = this.get<BotConfig>()
+        val botConfig = configManager.botConfig
         val message = context.event.message
         if (message.author.shouldIgnore(botConfig)) return
 
@@ -100,7 +102,7 @@ class LgRelayService : KordExKoinComponent {
         webhookName: String,
         outChannel: Snowflake?,
     ) {
-        val botConfig =  this.get<BotConfig>()
+        val botConfig =  configManager.botConfig
         val eventMessage = context.event.message ?: return
         if (eventMessage.author.shouldIgnore(botConfig)) return
         val oldMessage = outChannel?.let {
@@ -124,7 +126,7 @@ class LgRelayService : KordExKoinComponent {
         outChannel: Snowflake,
         isAnonymous: Boolean
     ) {
-        val botConfig = this.get<BotConfig>()
+        val botConfig = configManager.botConfig
         val event = context.event
         if (event.old?.author.shouldIgnore(botConfig)) return
         val oldMessage = event.old?.let { MessageChannelBehavior(outChannel, bot.kordRef).getCorrespondingMessage(it) }
@@ -212,7 +214,7 @@ class LgRelayService : KordExKoinComponent {
         emoji: ReactionEmoji,
         isAdd: Boolean
     ) {
-        val botConfig = this.get<BotConfig>()
+        val botConfig = configManager.botConfig
         if (message.author.shouldIgnore(botConfig) || author.shouldIgnore(botConfig)) return
         val (userName, userAvatar) = getMessageIdentity(author, isAnonymous)
         val content = buildRelayReactionContent(emoji, message, isAdd)
