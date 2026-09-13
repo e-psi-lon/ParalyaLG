@@ -15,5 +15,5 @@ fun <T : Any, I : Any> KordCacheBuilder.redisCache(config: RedisConfiguration = 
 
 @Suppress("UnusedReceiverParameter") // used for scoping
 fun <T : Any, I : Any> KordCacheBuilder.redisCacheWithTtl(config: RedisConfiguration = RedisConfiguration(), ttl: Duration): Generator<T, I> = { cache, description ->
-    DefaultTtlRedisEntryCache(RedisEntryCache(cache, description, config, entryName = description.klass.qualifiedName.orUnknownClass()), ttl)
+    DefaultTtlEntryCache(RedisEntryCache(cache, description, config, entryName = description.klass.qualifiedName.orUnknownClass()), ttl)
 }

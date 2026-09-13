@@ -2,12 +2,11 @@ package fr.paralya.bot.common.cache
 
 import dev.kord.cache.api.DataEntryCacheWithTTL
 import dev.kord.cache.api.annotation.CacheExperimental
-import dev.kord.cache.redis.RedisEntryCache
 import kotlinx.coroutines.flow.Flow
 import kotlin.time.Duration
 
-class DefaultTtlRedisEntryCache<T : Any, I>(
-    private val delegate: RedisEntryCache<T, I>,
+class DefaultTtlEntryCache<T : Any>(
+    private val delegate: DataEntryCacheWithTTL<T>,
     private val defaultTtl: Duration,
 ) : DataEntryCacheWithTTL<T> by delegate {
     @CacheExperimental
