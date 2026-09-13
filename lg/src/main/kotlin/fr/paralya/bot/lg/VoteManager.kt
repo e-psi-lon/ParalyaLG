@@ -1,14 +1,14 @@
 package fr.paralya.bot.lg
 
+import dev.kord.cache.api.put
+import dev.kord.cache.api.query
 import dev.kord.core.Kord
 import dev.kord.core.cache.idEq
 import dev.kord.core.entity.User
 import dev.kordex.core.koin.KordExKoinComponent
 import fr.paralya.bot.common.cache.atomic
 import fr.paralya.bot.common.cache.idEq
-import fr.paralya.bot.common.cache.putSerialized
-import fr.paralya.bot.common.cache.querySerialized
-import fr.paralya.bot.common.cache.updateSerialized
+import fr.paralya.bot.common.cache.update
 import fr.paralya.bot.common.snowflake
 import fr.paralya.bot.lg.data.GamePhase.PhaseType
 import fr.paralya.bot.lg.data.Target
@@ -31,10 +31,8 @@ import org.koin.core.component.inject
  */
 @Suppress("TooManyFunctions")
 class VoteManager : KordExKoinComponent {
-	private val plugin by inject<LgPlugin>()
 	private val kord by inject<Kord>()
 	private val botCache by lazy { kord.cache }
-	private val pluginNamespace by lazy { plugin.pluginId }
 	private val voteMutex = Mutex()
 
 
@@ -45,7 +43,7 @@ class VoteManager : KordExKoinComponent {
 	 */
 	suspend fun getCurrentVote(phase: PhaseType?): VoteData? {
 		val queryType = phase ?: botCache.getGameData().phase.type
-		return botCache.querySerialized<VoteData>(pluginNamespace) {
+		return botCache.query<VoteData>() {
 			idEq(VoteData::type, queryType)
 			idEq(VoteData::isCurrent, true)
 		}.singleOrNull()
@@ -56,14 +54,14 @@ class VoteManager : KordExKoinComponent {
 		transform: (VoteData) -> VoteData
 	) = botCache.atomic(voteMutex) {
 		val queryType = type ?: getGameData().phase.type
-		updateSerialized(pluginNamespace, VoteData::id, block = {
+		update(block = {
 			idEq(VoteData::type, queryType)
 			idEq(VoteData::isCurrent, true)
 		}, transform = transform)
 	}
 
 	suspend fun putVote(voteData: VoteData) =
-		botCache.putSerialized(pluginNamespace, voteData, VoteData::id)
+		botCache.put(voteData)
 
 	/**
 	 * Registers a vote from a user for a target

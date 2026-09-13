@@ -29,7 +29,6 @@ import fr.paralya.bot.I18n
 import fr.paralya.bot.common.GameRegistry
 import fr.paralya.bot.common.adminOnly
 import fr.paralya.bot.common.asUser
-import fr.paralya.bot.common.cache.CachedData
 import fr.paralya.bot.common.contextTranslate
 import fr.paralya.bot.common.gameMode
 import fr.paralya.bot.common.getCorrespondingMessage
@@ -60,7 +59,6 @@ class Base : Extension() {
 	private val configManager by inject<ConfigManager>()
 	private val gameRegistry by inject<GameRegistry>()
     override suspend fun setup() {
-		kord.cache.register(CachedData.description)
 		val dmChannelId = configManager.botConfig.dmLogChannelId.snowflake
 		event<ReadyEvent> {
 			action {

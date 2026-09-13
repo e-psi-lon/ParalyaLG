@@ -2,18 +2,18 @@
 package fr.paralya.bot.lg.data
 
 import dev.kord.cache.api.DataCache
+import dev.kord.cache.api.annotation.CacheExperimental
 import dev.kord.cache.api.data.description
+import dev.kord.cache.api.put
+import dev.kord.cache.api.query
+import dev.kord.cache.api.remove
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.channel.TextChannel
 import dev.kordex.core.commands.application.ApplicationCommandContext
 import fr.paralya.bot.common.cache.atomic
-import fr.paralya.bot.common.cache.putSerialized
-import fr.paralya.bot.common.cache.querySerialized
-import fr.paralya.bot.common.cache.removeSerialized
-import fr.paralya.bot.common.plugins.getPluginInstance
-import fr.paralya.bot.lg.LgPlugin
 import kotlinx.serialization.Serializable
 import kotlin.collections.plus
+import kotlin.time.Duration
 
 /**
  * Represents the game data for the Werewolf game.
@@ -66,18 +66,13 @@ fun GameData.removeInterview(interviewId: Snowflake) = copy(interviews = intervi
 
 // Cache extension functions
 
-private val pluginNamespace: String by lazy {
-	getPluginInstance<LgPlugin>().pluginId
-}
-
-// Simpler - just one lazy initialization
 /**
  * Retrieves the current game data from the cache or creates a new one if none exists.
  * @return The current [GameData] instance.
  */
 suspend fun DataCache.getGameData(): GameData = atomic {
-	querySerialized<GameData>(pluginNamespace).singleOrNull() ?: GameData().also {
-		putSerialized(pluginNamespace, it)
+	query<GameData>().singleOrNull() ?: GameData().also {
+		put(it)
 	}
 }
 
@@ -85,8 +80,8 @@ suspend fun DataCache.getGameData(): GameData = atomic {
  * Resets the game data by removing existing data and adding a fresh [GameData] instance.
  */
 suspend fun DataCache.resetGameData() = atomic {
-	removeSerialized<GameData>(pluginNamespace)
-	putSerialized(pluginNamespace, GameData())
+	remove<GameData>()
+	put(GameData())
 }
 
 /**
@@ -95,9 +90,8 @@ suspend fun DataCache.resetGameData() = atomic {
  * @param modifier A function that transforms the current [GameData] to a new [GameData].
  */
 internal suspend inline fun DataCache.updateGameData(modifier: (GameData) -> GameData) = atomic {
-	putSerialized(
-		pluginNamespace,
-		modifier(querySerialized<GameData>(pluginNamespace).singleOrNull() ?: GameData())
+	put(
+		modifier(query<GameData>().singleOrNull() ?: GameData())
 	)
 }
 
