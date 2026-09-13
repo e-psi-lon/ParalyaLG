@@ -19,18 +19,31 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.withOptions
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
+import dev.kord.cache.map.MapLikeCollection
+import dev.kord.cache.map.internal.MapEntryCache
 import dev.kord.cache.redis.RedisConfiguration
+import dev.kord.cache.redis.RedisConfiguration.Defaults
+import dev.kord.cache.redis.RedisEntryCache
 import dev.kord.core.cache.lruCache
 import dev.kordex.core.DISCORD_RED
 import dev.kordex.core.annotations.warnings.ReplacingDefaultErrorResponseBuilder
 import dev.kordex.i18n.generated.CoreTranslations
 import fr.paralya.bot.common.InternalBotApi
-import fr.paralya.bot.common.cache.redisCache
+import fr.paralya.bot.common.cache.RedisFallbackEntryCache
 import fr.paralya.bot.common.cache.redisCacheWithTtl
+import fr.paralya.bot.common.cache.redisConfig
+import fr.paralya.bot.common.orUnknownClass
 import fr.paralya.bot.extensions.Monitoring
 import fr.paralya.bot.extensions.plugins.PluginExtension
+import io.lettuce.core.RedisClient
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.serializerOrNull
 import org.slf4j.LoggerFactory
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
+import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -53,6 +66,14 @@ private fun configureLogging(devMode: Boolean) {
 	rootLogger.level = if (devMode) Level.DEBUG else Level.INFO
 }
 
+private var clientInitialized = false
+private val sharedClient: RedisClient by lazy {
+	clientInitialized = true
+	RedisClient.create(System.getenv(Defaults.KORD_REDIS_URL) ?: Defaults.DEFAULT_URL)
+}
+
+@OptIn(InternalBotApi::class)
+private fun redisConfig(): RedisConfiguration = redisConfig(sharedClient)
 
 /**
  * Builds and configures the bot instance.
@@ -109,30 +130,45 @@ suspend fun buildBot(args: Array<String>): ExtensibleBot {
 		members { all() }
 
 		kord {
+			val incompatibleTypes: MutableSet<KClass<*>> = ConcurrentHashMap.newKeySet()
+			@OptIn(InternalSerializationApi::class)
 			cache {
-				val redisConfig = RedisConfiguration {
+				defaultGenerator = { cache, description ->
+					val hasSerializer = description.klass.serializerOrNull() != null
+					val mapCache = MapEntryCache(
+						cache,
+						description,
+						MapLikeCollection.concurrentHashMap()
+					)
+					if (hasSerializer) {
+						val redis = RedisEntryCache(
+							cache,
+							description,
+							redisConfig(),
+							entryName = description.klass.qualifiedName.orUnknownClass()
+						)
 
+						RedisFallbackEntryCache(redis, mapCache, description, incompatibleTypes)
+					} else mapCache
 				}
-				defaultGenerator = redisCache(redisConfig)
 				presences(lruCache(50))
 				voiceState(lruCache(50))
 
-				messages(redisCacheWithTtl(redisConfig, 45.minutes))
-				guilds(redisCacheWithTtl(redisConfig, 7.days))
+				messages(redisCacheWithTtl(redisConfig(), 45.minutes))
+				guilds(redisCacheWithTtl(redisConfig(), 7.days))
 
-				channels(redisCacheWithTtl(redisConfig, 2.days))
-				roles(redisCacheWithTtl(redisConfig, 2.days))
+				channels(redisCacheWithTtl(redisConfig(), 2.days))
+				roles(redisCacheWithTtl(redisConfig(), 2.days))
 
-				members(redisCacheWithTtl(redisConfig, 12.hours))
+				members(redisCacheWithTtl(redisConfig(), 12.hours))
 
-				webhooks(redisCacheWithTtl(redisConfig, 2.days))
-
-				emojis(redisCacheWithTtl(redisConfig, 7.days))
-				stickers(redisCacheWithTtl(redisConfig, 7.days))
-				soundboardSounds(redisCacheWithTtl(redisConfig, 7.days))
-				autoModerationRules(redisCacheWithTtl(redisConfig, 7.days))
-				entitlements(redisCacheWithTtl(redisConfig, 7.days))
-				subscriptions(redisCacheWithTtl(redisConfig, 7.days))
+				webhooks(redisCacheWithTtl(redisConfig(), 2.days))
+				emojis(redisCacheWithTtl(redisConfig(), 7.days))
+				stickers(redisCacheWithTtl(redisConfig(), 7.days))
+				soundboardSounds(redisCacheWithTtl(redisConfig(), 7.days))
+				autoModerationRules(redisCacheWithTtl(redisConfig(), 7.days))
+				entitlements(redisCacheWithTtl(redisConfig(), 7.days))
+				subscriptions(redisCacheWithTtl(redisConfig(), 7.days))
 			}
 		}
 
@@ -171,5 +207,9 @@ suspend fun buildBot(args: Array<String>): ExtensibleBot {
 				}
 			}
 		}
+	}.also {
+		Runtime.getRuntime().addShutdownHook(thread(false) {
+			sharedClient.shutdown(100, 500, TimeUnit.MILLISECONDS)
+		})
 	}
 }

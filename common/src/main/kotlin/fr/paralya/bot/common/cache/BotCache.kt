@@ -4,6 +4,9 @@ import dev.kord.cache.api.DataCache
 import dev.kord.cache.api.Query
 import dev.kord.cache.api.QueryBuilder
 import dev.kord.cache.api.put
+import dev.kord.cache.redis.RedisConfiguration
+import fr.paralya.bot.common.InternalBotApi
+import io.lettuce.core.RedisClient
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.cbor.Cbor
@@ -25,8 +28,19 @@ fun <T : Any, E : Enum<E>> QueryBuilder<T>.idEq(property: KProperty1<T, E?>, val
 
 @OptIn(ExperimentalSerializationApi::class)
 private val cbor = Cbor {
+    encodeDefaults = false
     ignoreUnknownKeys = true
+    useDefiniteLengthEncoding = true
+    alwaysUseByteString = true
 }
+
+@OptIn(ExperimentalSerializationApi::class)
+@InternalBotApi
+fun redisConfig(client: RedisClient): RedisConfiguration = RedisConfiguration {
+    this.client = client
+    this.binaryFormat = cbor
+}
+
 
 @PublishedApi
 internal const val UNKNOWN_TYPE_KEY = "unknown"
