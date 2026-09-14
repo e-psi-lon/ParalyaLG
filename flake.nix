@@ -99,7 +99,7 @@
 
       devShells.${system}.default = import ./nix/shell.nix {
         inherit lib project-jdk;
-        inherit (pkgs) writeShellScriptBin mkShell go;
+        inherit (pkgs) writeShellScriptBin mkShell;
         inherit (utils) extractVersion;
       };
     };
